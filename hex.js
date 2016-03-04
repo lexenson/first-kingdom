@@ -1,28 +1,71 @@
 //pointy-topped hexagon
-var hex = {
-  size: 10,
-  center: center(this)
+
+function Hexagon(x, y, z) {
+  this.x = x;
+  this.y = y;
+  this.z = z;
+  this.radius = 25
+  this.height = this.radius*2;
+  this.width = (Math.sqrt(3)/2) * this.height
+  this.polygon = []
+  var p = this.getPixel()
+  for(var i = 0; i < 6; i++) {
+    this.polygon.push(
+      {
+        x: this.radius * Math.cos(i * 1/3 * Math.PI + 1/6 * Math.PI) + p.x + this.radius + 1,
+        y: this.radius * Math.sin(i * 1/3 * Math.PI + 1/6 * Math.PI) + p.y + this.radius + 1
+      }
+    )
+  }
 }
 
-hex.pos = {
-    x: 0,
-    y: 0,
-    z: 0
-  }
+Hexagon.prototype.draw = function (ctx) {
+  ctx.save()
+  ctx.beginPath()
+  drawPolygon(ctx, this.polygon)
+  ctx.fillStyle = '#ffffff'
+  ctx.strokeStyle = '#000000'
+  ctx.lineWidth = 2
+  ctx.stroke()
+  ctx.fill()
+  ctx.closePath()
+  ctx.restore()
+}
 
-hex.height = hex.size*2;
+Hexagon.prototype.getPixel = function () {
+  var p = {}
+  p.x = this.radius * Math.sqrt(3) * (this.x + this.y/2)
+  p.y = this.radius * 3/2 * this.y
+  return p
 
-hex.width = (Math.sqrt(3)/2) * hex.height;
+    // return {
+    //   x: (this.x)*(this.width/2) * (3*this.height/2) + (this.y)*(-this.width/2)*(3*this.height/2),
+    //   y: this.width * this.z
+    // }
+}
+
+function hexToPixel(hex) {
+  var size = 25
+  var p = {}
+  p.y = size * Math.sqrt(3) * (hex.x + hex.y/2)
+  p.x = size * 3/2 * hex.y
+  return p
+}
+
+function drawPolygon(c, polygon) {
+    c.beginPath()
+    c.moveTo(polygon[0].x, polygon[0].y)
+    for(var i = 1; i < polygon.length; i++) c.lineTo(polygon[i].x, polygon[i].y)
+    c.lineTo(polygon[0].x, polygon[0].y)
+    c.closePath()
+}
 
 //returns the manhatten distance between hexagon a and hexagon b
 function distance(a,b) {
   return (Math.abs(a.x - b.x) + Math.abs(a.y - b.y) + Math.abs(a.z - b.z))/2;
 }
 
-//returns the x-and y-coordinates of the centre of the given hexagon a
-function center(a){
-  return {x: (this.x)*(this.width/2) * (3*this.height/2) + (this.y)*(-this.width/2)*(3*this.height/2), y: this.width * this.z }
-}
+
 
 //returns an object with the coordinates of the neighbours of hexagon a
 function getNeighborCoordinates(a) {
@@ -82,3 +125,5 @@ function getIndexFromCoordinates(pos) {
 }
 
 console.log(getIndexFromCoordinates({x:-2, y:2, z:0}));
+
+module.exports = Hexagon;

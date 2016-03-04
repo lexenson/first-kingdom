@@ -1,9 +1,24 @@
+var Hexagon = require('./hex.js');
+
+console.log(Hexagon);
+
 //Creating canvas
 var canvas = document.createElement("canvas");
-var ctx = canvas.getContext("2d");
 canvas.width = 1000;
 canvas.height = 500;
 document.body.appendChild(canvas);
+var ctx = canvas.getContext("2d");
+
+ctx.fillStyle = '#D8D3D0'
+ctx.fillRect(0, 0, 800, 600)
+
+
+for(var x = 0; x < 10; x++) {
+  for(var y = 0; y < 10; y++) {
+    var h = new Hexagon(x, y, -y-x)
+    h.draw(ctx)
+  }
+}
 
 var i;
 
@@ -154,7 +169,7 @@ function update(dt) {
 
 function draw(dt) {
   //clears the context in preparation for redrawing
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
   for(i=0; i<gameObjects.length; i++){
     if(gameObjects[i].draw){
       gameObjects[i].draw();
