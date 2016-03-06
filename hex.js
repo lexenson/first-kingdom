@@ -4,6 +4,7 @@ function Hexagon(x, y, z) {
   this.x = x;
   this.y = y;
   this.z = z;
+  this.color = '#fff'
   this.radius = 25
   this.height = this.radius*2;
   this.width = (Math.sqrt(3)/2) * this.height
@@ -23,7 +24,7 @@ Hexagon.prototype.draw = function (ctx) {
   ctx.save()
   ctx.beginPath()
   drawPolygon(ctx, this.polygon)
-  ctx.fillStyle = '#ffffff'
+  ctx.fillStyle = this.color
   ctx.strokeStyle = '#000000'
   ctx.lineWidth = 2
   ctx.stroke()
