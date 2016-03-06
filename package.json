@@ -1,0 +1,24 @@
+{
+  "name": "first-kingdom",
+  "version": "1.0.0",
+  "description": "TBS game based on a hexagonal grid",
+  "main": "game.js",
+  "scripts": {
+    "start": "wzrd game.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lexenson/first-kingdom.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/lexenson/first-kingdom/issues"
+  },
+  "homepage": "https://github.com/lexenson/first-kingdom#readme",
+  "devDependencies": {
+    "browserify": "^13.0.0",
+    "standard": "^6.0.7",
+    "wzrd": "^1.3.1"
+  }
+}
