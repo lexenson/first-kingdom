@@ -1,8 +1,10 @@
 var World = require('./world.js')
 
-var world = new World(12, 12) // map
+// Global variables
+var world
+var gameObjects
 
-var gameObjects = [ world ]
+init()
 
 // Creating canvas
 var canvas = document.createElement('canvas')
@@ -11,11 +13,7 @@ canvas.height = 500
 document.body.appendChild(canvas)
 var ctx = canvas.getContext('2d')
 
-// Game variables
-// var game_state = ['menu', 'paused', 'running']
-// var current_state = game_state[0] // game starts in menu
-
-// input
+// keyboard input
 var keyState = {}
 keyState.left = false
 keyState.right = false
@@ -123,8 +121,7 @@ function keyDownHandler (event) {
   }
 }
 
-// mouse
-
+// mouse input
 document.onmousemove = function (e) {
   var hex = world.getHexagonFromPixel(e.pageX, e.pageY)
   if (hex) hex.color = '#ff0000'
@@ -146,6 +143,9 @@ function main () {
 }
 
 function init () {
+  world = new World(12, 12) // map
+
+  gameObjects = [ world ]
 }
 
 function update (dt) {
@@ -175,5 +175,4 @@ function timestamp () {
 var now, dt
 var step = 1 / 60
 var last = timestamp()
-init()
 window.requestAnimationFrame(main)
