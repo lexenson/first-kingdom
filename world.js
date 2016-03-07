@@ -1,28 +1,35 @@
 var Hexagon = require('./hexagon.js')
 
 function World (width, height) {
-  this.tiles = {}
+  this.hexagons = {}
   for (var x = 0; x < width; x++) {
     for (var y = 0; y < height; y++) {
-      this.tiles[x + ',' + y] = new Hexagon(x, y, -y - x)
+      this.hexagons[x + ',' + y] = new Hexagon(x, y, -y - x)
     }
   }
 }
 
 World.prototype.getHexagonFromPixel = function (x, y) {
   var pos = pixelToHex(x, y)
-  return this.tiles[pos.x + ',' + pos.y]
+  return this.hexagons[pos.x + ',' + pos.y]
 }
 
 World.prototype.draw = function (ctx) {
-  for (var index in this.tiles) {
-    this.tiles[index].draw(ctx)
+  for (var index in this.hexagons) {
+    this.hexagons[index].draw(ctx)
   }
 }
 
 World.prototype.unhighlightAll = function () {
-  for (var tileIndex in this.tiles) {
-    this.tiles[tileIndex].highlighted = false
+  for (var tileIndex in this.hexagons) {
+    this.hexagons[tileIndex].highlighted = false
+  }
+}
+
+World.prototype.getHightlightedHexagon = function () {
+  for (var tileIndex in this.hexagons) {
+    var hex = this.hexagons[tileIndex]
+    if (hex.highlighted) return hex
   }
 }
 

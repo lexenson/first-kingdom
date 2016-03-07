@@ -11,6 +11,8 @@ function Hexagon (x, y, z) {
   this.highlighted = false
 
   this.radius = 40
+  this.height = this.radius * 2
+  this.width = (Math.sqrt(3) / 2) * this.height
 
   this.resourceColors = []
   var rgb = {
@@ -26,13 +28,10 @@ function Hexagon (x, y, z) {
   }
 
   this.info = {
-    units: 0,
+    unit: null,
     city: false,
     resources: Math.round(Math.random() * 9) // between 0-9
   }
-
-  this.height = this.radius * 2
-  this.width = (Math.sqrt(3) / 2) * this.height
 
   // polygon corners in pixel coordinates
   this.polygon = []
@@ -40,14 +39,19 @@ function Hexagon (x, y, z) {
   for (var i = 0; i < 6; i++) {
     this.polygon.push(
       {
-        x: this.radius * Math.cos(i * 1 / 3 * Math.PI + 1 / 6 * Math.PI) + p.x + this.radius + 1,
-        y: this.radius * Math.sin(i * 1 / 3 * Math.PI + 1 / 6 * Math.PI) + p.y + this.radius + 1
+        x: this.radius * Math.cos(i * 1 / 3 * Math.PI + 1 / 6 * Math.PI) + p.x,
+        y: this.radius * Math.sin(i * 1 / 3 * Math.PI + 1 / 6 * Math.PI) + p.y
       }
     )
   }
 }
 
 Hexagon.radius = 40
+
+Hexagon.offset = {
+  x: Hexagon.radius,
+  y: Hexagon.radius + 1
+}
 
 Hexagon.prototype.draw = function (ctx) {
   ctx.save()
@@ -59,21 +63,27 @@ Hexagon.prototype.draw = function (ctx) {
   ctx.stroke()
   ctx.fill()
   ctx.closePath()
+  ctx.restore()
+
+  if (this.info.unit) {
+    this.info.unit.draw(ctx)
+  }
 
   if (this.highlighted) {
+    ctx.save()
     ctx.beginPath()
     drawPolygon(ctx, this.polygon)
     ctx.fillStyle = this.highlightColor
     ctx.fill()
     ctx.closePath()
+    ctx.restore()
   }
-  ctx.restore()
 }
 
 Hexagon.prototype.getPixel = function () {
   var p = {}
-  p.x = this.radius * Math.sqrt(3) * (this.x + this.y / 2)
-  p.y = this.radius * 3 / 2 * this.y
+  p.x = this.radius * Math.sqrt(3) * (this.x + this.y / 2) + Hexagon.offset.x
+  p.y = this.radius * 3 / 2 * this.y + Hexagon.offset.y
   return p
 }
 
@@ -93,17 +103,20 @@ Hexagon.prototype.getNeighborCoordinates = function () {
   }
 }
 
+Hexagon.prototype.isAdjacent = function (otherHex) {
+  return this.getDistance(otherHex) === 1
+}
+
+Hexagon.prototype.getDistance = function (otherHex) {
+  return (Math.abs(this.x - otherHex.x) + Math.abs(this.y - otherHex.y) + Math.abs(this.z - otherHex.z)) / 2
+}
+
 function drawPolygon (c, polygon) {
   c.beginPath()
   c.moveTo(polygon[0].x, polygon[0].y)
   for (var i = 1; i < polygon.length; i++) c.lineTo(polygon[i].x, polygon[i].y)
   c.lineTo(polygon[0].x, polygon[0].y)
   c.closePath()
-}
-
-// returns the manhatten distance between hexagon a and hexagon b
-function distance (a, b) {
-  return (Math.abs(a.x - b.x) + Math.abs(a.y - b.y) + Math.abs(a.z - b.z)) / 2
 }
 
 module.exports = Hexagon

@@ -1,4 +1,5 @@
 var World = require('./world.js')
+var Unit = require('./unit.js')
 
 // Global variables
 var world
@@ -15,10 +16,12 @@ var ctx = canvas.getContext('2d')
 
 // keyboard input
 var keyState = {}
+
 keyState.left = false
 keyState.right = false
 keyState.up = false
 keyState.down = false
+
 keyState.numpad1 = false
 keyState.numpad1 = false
 keyState.numpad2 = false
@@ -29,6 +32,8 @@ keyState.numpad6 = false
 keyState.numpad7 = false
 keyState.numpad8 = false
 keyState.numpad9 = false
+
+keyState.m = false
 
 window.addEventListener('keyup', keyUpHandler, false)
 
@@ -52,28 +57,31 @@ function keyUpHandler (event) {
     keyState.down = false
     event.preventDefault()
   } else if (event.keyCode === 98) {
-    keyState.down = true
+    keyState.down = false
     event.preventDefault()
   } else if (event.keyCode === 99) {
-    keyState.down = true
+    keyState.down = false
     event.preventDefault()
   } else if (event.keyCode === 100) {
-    keyState.down = true
+    keyState.down = false
     event.preventDefault()
   } else if (event.keyCode === 101) {
-    keyState.down = true
+    keyState.down = false
     event.preventDefault()
   } else if (event.keyCode === 102) {
-    keyState.down = true
+    keyState.down = false
     event.preventDefault()
   } else if (event.keyCode === 103) {
-    keyState.down = true
+    keyState.down = false
     event.preventDefault()
   } else if (event.keyCode === 104) {
-    keyState.down = true
+    keyState.down = false
     event.preventDefault()
   } else if (event.keyCode === 105) {
-    keyState.down = true
+    keyState.down = false
+    event.preventDefault()
+  } else if (event.keyCode === 77) {
+    keyState.m = false
     event.preventDefault()
   }
 }
@@ -92,31 +100,34 @@ function keyDownHandler (event) {
     keyState.down = true
     event.preventDefault()
   } else if (event.keyCode === 97) {
-    keyState.down = false
+    keyState.down = true
     event.preventDefault()
   } else if (event.keyCode === 98) {
-    keyState.down = false
+    keyState.down = true
     event.preventDefault()
   } else if (event.keyCode === 99) {
-    keyState.down = false
+    keyState.down = true
     event.preventDefault()
   } else if (event.keyCode === 100) {
-    keyState.down = false
+    keyState.down = true
     event.preventDefault()
   } else if (event.keyCode === 101) {
-    keyState.down = false
+    keyState.down = true
     event.preventDefault()
   } else if (event.keyCode === 102) {
-    keyState.down = false
+    keyState.down = true
     event.preventDefault()
   } else if (event.keyCode === 103) {
-    keyState.down = false
+    keyState.down = true
     event.preventDefault()
   } else if (event.keyCode === 104) {
-    keyState.down = false
+    keyState.down = true
     event.preventDefault()
   } else if (event.keyCode === 105) {
-    keyState.down = false
+    keyState.down = true
+    event.preventDefault()
+  } else if (event.keyCode === 77) {
+    keyState.m = true
     event.preventDefault()
   }
 }
@@ -124,6 +135,12 @@ function keyDownHandler (event) {
 // mouse input
 document.onmouseup = function (e) {
   var hex = world.getHexagonFromPixel(e.pageX, e.pageY)
+  if (keyState.m) {
+    var lastHex = world.getHightlightedHexagon()
+    if (lastHex.info.unit && lastHex.isAdjacent(hex)) {
+      lastHex.info.unit.moveTo(hex)
+    }
+  }
   world.unhighlightAll()
   if (hex) hex.highlighted = true
 }
@@ -146,7 +163,11 @@ function main () {
 function init () {
   world = new World(12, 12) // map
 
-  gameObjects = [ world ]
+  var hex = world.hexagons['0,0']
+  var unit = new Unit(hex)
+  hex.info.unit = unit
+
+  gameObjects = [ world, unit ]
 }
 
 function update (dt) {
