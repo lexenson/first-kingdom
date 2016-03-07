@@ -6,8 +6,30 @@ function Hexagon (x, y, z) {
   this.z = z
 
   this.color = '#fff'
+  this.highlightColor = 'rgba(226, 193, 53, 0.4)'
 
-  this.radius = 25
+  this.highlighted = false
+
+  this.radius = 40
+
+  this.resourceColors = []
+  var rgb = {
+    r: 100,
+    g: 150,
+    b: 100
+  }
+  for (var j = 0; j < 10; j++) {
+    rgb.r -= 10
+    rgb.g -= 10
+    rgb.b -= 10
+    this.resourceColors[j] = 'rgb(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ')'
+  }
+
+  this.info = {
+    units: 0,
+    city: false,
+    resources: Math.round(Math.random() * 9) // between 0-9
+  }
 
   this.height = this.radius * 2
   this.width = (Math.sqrt(3) / 2) * this.height
@@ -25,18 +47,26 @@ function Hexagon (x, y, z) {
   }
 }
 
-Hexagon.radius = 25
+Hexagon.radius = 40
 
 Hexagon.prototype.draw = function (ctx) {
   ctx.save()
   ctx.beginPath()
   drawPolygon(ctx, this.polygon)
-  ctx.fillStyle = this.color
+  ctx.fillStyle = this.resourceColors[this.info.resources]
   ctx.strokeStyle = '#000000'
   ctx.lineWidth = 2
   ctx.stroke()
   ctx.fill()
   ctx.closePath()
+
+  if (this.highlighted) {
+    ctx.beginPath()
+    drawPolygon(ctx, this.polygon)
+    ctx.fillStyle = this.highlightColor
+    ctx.fill()
+    ctx.closePath()
+  }
   ctx.restore()
 }
 

@@ -20,6 +20,12 @@ World.prototype.draw = function (ctx) {
   }
 }
 
+World.prototype.unhighlightAll = function () {
+  for (var tileIndex in this.tiles) {
+    this.tiles[tileIndex].highlighted = false
+  }
+}
+
 module.exports = World
 
 // returns snapped coordinates in 3d hexagonal cube grid

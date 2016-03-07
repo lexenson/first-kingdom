@@ -8,8 +8,8 @@ init()
 
 // Creating canvas
 var canvas = document.createElement('canvas')
-canvas.width = 1000
-canvas.height = 500
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight
 document.body.appendChild(canvas)
 var ctx = canvas.getContext('2d')
 
@@ -122,9 +122,10 @@ function keyDownHandler (event) {
 }
 
 // mouse input
-document.onmousemove = function (e) {
+document.onmouseup = function (e) {
   var hex = world.getHexagonFromPixel(e.pageX, e.pageY)
-  if (hex) hex.color = '#ff0000'
+  world.unhighlightAll()
+  if (hex) hex.highlighted = true
 }
 
 // main game functions
