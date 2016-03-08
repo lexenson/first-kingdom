@@ -2,8 +2,6 @@
 
 ## High priority
 
-- turn-based
-- getting resources and displaying them
 - using resources to build units
 - menus and game states
 - combat system
@@ -27,3 +25,6 @@
 - implement move-mode
 - unhighlight in move-mode by clicking on a non-valid tile (or keep hightlight)
 - basic interface
+- turn-based
+- player class
+- getting resources and displaying them

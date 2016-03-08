@@ -1,6 +1,8 @@
 var Hexagon = require('./hexagon.js')
 
-function World (width, height) {
+function World (width, height, game) {
+  this.game = game
+
   this.hexagons = {}
   for (var x = 0; x < width; x++) {
     for (var y = 0; y < height; y++) {
@@ -39,6 +41,15 @@ World.prototype.getHightlightedHexagon = function () {
   for (var tileIndex in this.hexagons) {
     var hex = this.hexagons[tileIndex]
     if (hex.highlighted) return hex
+  }
+}
+
+World.prototype.distributeResources = function () {
+  for (var tileIndex in this.hexagons) {
+    var hex = this.hexagons[tileIndex]
+    if (hex.info.owner > 0) {
+      this.game.players[hex.info.owner - 1].resources += hex.info.resources
+    }
   }
 }
 

@@ -1,6 +1,7 @@
 var createKeyboard = require('crtrdg-keyboard')
 
 var World = require('./world.js')
+var Player = require('./player.js')
 var Unit = require('./unit.js')
 var HUD = require('./hud.js')
 
@@ -10,7 +11,9 @@ var game = {
   world: null,
   width: window.innerWidth,
   height: window.innerHeight,
-  objects: []
+  objects: [],
+  players: [],
+  turn: 1
 }
 
 var hud = new HUD(game)
@@ -28,10 +31,17 @@ var ctx = canvas.getContext('2d')
 var keyboard = createKeyboard()
 keyboard.on('keydown', function (key) {
   var currentHex = game.world.getHightlightedHexagon()
+
+  // mode-specific commands
   if (game.mode === 'default') {
     if (key === 'M' && currentHex.info.unit) game.mode = 'move'
   } else if (game.mode === 'move') {
     if (key === 'M') game.mode = 'default'
+  }
+
+  // general commands
+  if (key === '<enter>') {
+    nextTurn()
   }
 })
 
@@ -54,6 +64,13 @@ document.onmouseup = function (e) {
   }
 }
 
+// additional game logic
+
+function nextTurn () {
+  game.turn++
+  game.world.distributeResources()
+}
+
 // main game functions
 function main () {
   now = timestamp()
@@ -70,15 +87,15 @@ function main () {
 }
 
 function init () {
-  game.world = new World(12, 12) // map
+  game.world = new World(12, 12, game) // map
+
+  game.players.push(new Player(1))
 
   var hex = game.world.hexagons['0,0']
   var unit = new Unit(hex, 1)
+  game.players[0].addUnit(unit)
 
-  var hex2 = game.world.hexagons['11,11']
-  var unit2 = new Unit(hex2, 2)
-
-  game.objects = [ game.world, unit, unit2 ]
+  game.objects = [game.world, unit]
 }
 
 function update (dt) {
@@ -95,7 +112,6 @@ function draw (dt) {
   // clears the context in preparation for redrawing
   ctx.fillStyle = '#D8D3D0'
   ctx.fillRect(0, 0, canvas.width, canvas.height)
-
 
   for (var i = 0; i < game.objects.length; i++) {
     if (game.objects[i].draw) {
