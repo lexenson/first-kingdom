@@ -11,7 +11,6 @@
 
 ## Low priority
 
-- in move-mode: show reachable tiles graphically
 - unhighlight by right-clicking
 - animation for unit movement
 - animation for getting territory
@@ -29,3 +28,4 @@
 - getting resources and displaying them
 - refactor keyboard to module
 - highlighting tile borders instead of overlay
+- in move-mode: show reachable tiles graphically

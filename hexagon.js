@@ -173,7 +173,6 @@ Hexagon.prototype.getNeighbors = function (world) {
     var x = neighborCoordinate.x
     var y = neighborCoordinate.y
     neighbors[dir] = world.getHexagonFromCoordinate(x, y)
-    console.log(neighbors[dir])
   }
 
   return neighbors
