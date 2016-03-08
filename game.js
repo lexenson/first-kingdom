@@ -1,149 +1,56 @@
+var createKeyboard = require('crtrdg-keyboard')
+
 var World = require('./world.js')
 var Unit = require('./unit.js')
+var HUD = require('./hud.js')
 
-// Global variables
-var world
-var gameObjects
+// Global game object
+var game = {
+  mode: 'default', // 'move'
+  world: null,
+  width: window.innerWidth,
+  height: window.innerHeight,
+  objects: []
+}
+
+var hud = new HUD(game)
 
 init()
 
 // Creating canvas
 var canvas = document.createElement('canvas')
-canvas.width = window.innerWidth
-canvas.height = window.innerHeight
+canvas.width = game.width
+canvas.height = game.height
 document.body.appendChild(canvas)
 var ctx = canvas.getContext('2d')
 
 // keyboard input
-var keyState = {}
-
-keyState.left = false
-keyState.right = false
-keyState.up = false
-keyState.down = false
-
-keyState.numpad1 = false
-keyState.numpad1 = false
-keyState.numpad2 = false
-keyState.numpad3 = false
-keyState.numpad4 = false
-keyState.numpad5 = false
-keyState.numpad6 = false
-keyState.numpad7 = false
-keyState.numpad8 = false
-keyState.numpad9 = false
-
-keyState.m = false
-
-window.addEventListener('keyup', keyUpHandler, false)
-
-window.addEventListener('keydown', keyDownHandler, false)
-
-function keyUpHandler (event) {
-  event.preventDefault()
-  if (event.keyCode === 37) {
-    keyState.left = false
-    event.preventDefault()
-  } else if (event.keyCode === 38) {
-    keyState.up = false
-    event.preventDefault()
-  } else if (event.keyCode === 39) {
-    keyState.right = false
-    event.preventDefault()
-  } else if (event.keyCode === 40) {
-    keyState.down = false
-    event.preventDefault()
-  } else if (event.keyCode === 97) {
-    keyState.down = false
-    event.preventDefault()
-  } else if (event.keyCode === 98) {
-    keyState.down = false
-    event.preventDefault()
-  } else if (event.keyCode === 99) {
-    keyState.down = false
-    event.preventDefault()
-  } else if (event.keyCode === 100) {
-    keyState.down = false
-    event.preventDefault()
-  } else if (event.keyCode === 101) {
-    keyState.down = false
-    event.preventDefault()
-  } else if (event.keyCode === 102) {
-    keyState.down = false
-    event.preventDefault()
-  } else if (event.keyCode === 103) {
-    keyState.down = false
-    event.preventDefault()
-  } else if (event.keyCode === 104) {
-    keyState.down = false
-    event.preventDefault()
-  } else if (event.keyCode === 105) {
-    keyState.down = false
-    event.preventDefault()
-  } else if (event.keyCode === 77) {
-    keyState.m = false
-    event.preventDefault()
+var keyboard = createKeyboard()
+keyboard.on('keydown', function (key) {
+  var currentHex = game.world.getHightlightedHexagon()
+  if (game.mode === 'default') {
+    if (key === 'M' && currentHex.info.unit) game.mode = 'move'
+  } else if (game.mode === 'move') {
+    if (key === 'M') game.mode = 'default'
   }
-}
-
-function keyDownHandler (event) {
-  if (event.keyCode === 37) {
-    keyState.left = true
-    event.preventDefault()
-  } else if (event.keyCode === 38) {
-    keyState.up = true
-    event.preventDefault()
-  } else if (event.keyCode === 39) {
-    keyState.right = true
-    event.preventDefault()
-  } else if (event.keyCode === 40) {
-    keyState.down = true
-    event.preventDefault()
-  } else if (event.keyCode === 97) {
-    keyState.down = true
-    event.preventDefault()
-  } else if (event.keyCode === 98) {
-    keyState.down = true
-    event.preventDefault()
-  } else if (event.keyCode === 99) {
-    keyState.down = true
-    event.preventDefault()
-  } else if (event.keyCode === 100) {
-    keyState.down = true
-    event.preventDefault()
-  } else if (event.keyCode === 101) {
-    keyState.down = true
-    event.preventDefault()
-  } else if (event.keyCode === 102) {
-    keyState.down = true
-    event.preventDefault()
-  } else if (event.keyCode === 103) {
-    keyState.down = true
-    event.preventDefault()
-  } else if (event.keyCode === 104) {
-    keyState.down = true
-    event.preventDefault()
-  } else if (event.keyCode === 105) {
-    keyState.down = true
-    event.preventDefault()
-  } else if (event.keyCode === 77) {
-    keyState.m = true
-    event.preventDefault()
-  }
-}
+})
 
 // mouse input
 document.onmouseup = function (e) {
-  var hex = world.getHexagonFromPixel(e.pageX, e.pageY)
-  if (keyState.m && hex) {
-    var lastHex = world.getHightlightedHexagon()
+  var hex = game.world.getHexagonFromPixel(e.pageX, e.pageY)
+  if (game.mode === 'move' && hex) {
+    var lastHex = game.world.getHightlightedHexagon()
     if (lastHex && lastHex.info.unit && lastHex.isAdjacent(hex)) {
-      lastHex.info.unit.moveTo(hex)
+      if (!hex.info.unit) {
+        lastHex.info.unit.moveTo(hex)
+        game.world.unhighlightAll()
+        hex.highlighted = true
+      }
     }
   }
-  if (hex && hex.info.unit) {
-    world.unhighlightAll()
-    hex.highlighted = true
+  if (game.mode === 'default') {
+    game.world.unhighlightAll()
+    if (hex && hex.info.unit) hex.highlighted = true
   }
 }
 
@@ -163,21 +70,23 @@ function main () {
 }
 
 function init () {
-  world = new World(12, 12) // map
+  game.world = new World(12, 12) // map
 
-  var hex = world.hexagons['0,0']
+  var hex = game.world.hexagons['0,0']
   var unit = new Unit(hex, 1)
 
-  var hex2 = world.hexagons['11,11']
+  var hex2 = game.world.hexagons['11,11']
   var unit2 = new Unit(hex2, 2)
 
-  gameObjects = [ world, unit, unit2 ]
+  game.objects = [ game.world, unit, unit2 ]
 }
 
 function update (dt) {
-  for (var i = 0; i < gameObjects.length; i++) {
-    if (gameObjects[i].update) {
-      gameObjects[i].update(dt)
+  hud.update(dt)
+
+  for (var i = 0; i < game.objects.length; i++) {
+    if (game.objects[i].update) {
+      game.objects[i].update(dt)
     }
   }
 }
@@ -187,11 +96,14 @@ function draw (dt) {
   ctx.fillStyle = '#D8D3D0'
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-  for (var i = 0; i < gameObjects.length; i++) {
-    if (gameObjects[i].draw) {
-      gameObjects[i].draw(ctx)
+
+  for (var i = 0; i < game.objects.length; i++) {
+    if (game.objects[i].draw) {
+      game.objects[i].draw(ctx)
     }
   }
+
+  hud.draw(ctx)
 }
 
 function timestamp () {
