@@ -9,15 +9,24 @@ function World (width, height) {
   }
 }
 
-World.prototype.getHexagonFromPixel = function (x, y) {
-  var pos = pixelToHex(x, y)
-  return this.hexagons[pos.x + ',' + pos.y]
+World.prototype.update = function (dt) {
+  for (var index in this.hexagons) {
+    var hex = this.hexagons[index]
+    if (hex.info.unit) {
+      hex.info.owner = hex.info.unit.playerId
+    }
+  }
 }
 
 World.prototype.draw = function (ctx) {
   for (var index in this.hexagons) {
     this.hexagons[index].draw(ctx)
   }
+}
+
+World.prototype.getHexagonFromPixel = function (x, y) {
+  var pos = pixelToHex(x, y)
+  return this.hexagons[pos.x + ',' + pos.y]
 }
 
 World.prototype.unhighlightAll = function () {

@@ -2,16 +2,27 @@
 
 ## High priority
 
-- movement for units
-- territory display
+- turn-based
+- getting resources and displaying them
+- using resources to build units
+- menus and game states
+- combat system
+- turns over network
 - building cities
 
 
 ## Low priority
 
 - highlighting tile borders instead of overlay
-- only highlight tiles with units
 - refactor keyboard to module
+- unhighlight by right-clicking
+- implement move-mode
+- unhighlight in move-mode by clicking on a non-valid tile (or keep hightlight)
+- in move-mode: show reachable tiles graphically
+- animation for unit movement, getting territory
 
 ## Done
 - basic units
+- movement for units
+- only highlight tiles with units
+- territory display

@@ -1,5 +1,8 @@
-function Unit (hex) {
+function Unit (hex, playerId) {
   this.hex = hex
+  this.hex.info.unit = this
+
+  this.playerId = playerId
 
   this.color = '#000'
 }

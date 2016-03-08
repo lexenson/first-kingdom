@@ -135,14 +135,16 @@ function keyDownHandler (event) {
 // mouse input
 document.onmouseup = function (e) {
   var hex = world.getHexagonFromPixel(e.pageX, e.pageY)
-  if (keyState.m) {
+  if (keyState.m && hex) {
     var lastHex = world.getHightlightedHexagon()
-    if (lastHex.info.unit && lastHex.isAdjacent(hex)) {
+    if (lastHex && lastHex.info.unit && lastHex.isAdjacent(hex)) {
       lastHex.info.unit.moveTo(hex)
     }
   }
-  world.unhighlightAll()
-  if (hex) hex.highlighted = true
+  if (hex && hex.info.unit) {
+    world.unhighlightAll()
+    hex.highlighted = true
+  }
 }
 
 // main game functions
@@ -164,10 +166,12 @@ function init () {
   world = new World(12, 12) // map
 
   var hex = world.hexagons['0,0']
-  var unit = new Unit(hex)
-  hex.info.unit = unit
+  var unit = new Unit(hex, 1)
 
-  gameObjects = [ world, unit ]
+  var hex2 = world.hexagons['11,11']
+  var unit2 = new Unit(hex2, 2)
+
+  gameObjects = [ world, unit, unit2 ]
 }
 
 function update (dt) {

@@ -1,34 +1,28 @@
 // pointy-topped hexagon
 
+var playerColors = [
+  {r: 213, g: 213, b: 195},
+  {r: 255, g: 110, b: 110},
+  {r: 110, g: 110, b: 255}
+]
+
 function Hexagon (x, y, z) {
   this.x = x
   this.y = y
   this.z = z
+
+  this.radius = 40
+  this.height = this.radius * 2
+  this.width = (Math.sqrt(3) / 2) * this.height
 
   this.color = '#fff'
   this.highlightColor = 'rgba(226, 193, 53, 0.4)'
 
   this.highlighted = false
 
-  this.radius = 40
-  this.height = this.radius * 2
-  this.width = (Math.sqrt(3) / 2) * this.height
-
-  this.resourceColors = []
-  var rgb = {
-    r: 100,
-    g: 150,
-    b: 100
-  }
-  for (var j = 0; j < 10; j++) {
-    rgb.r -= 10
-    rgb.g -= 10
-    rgb.b -= 10
-    this.resourceColors[j] = 'rgb(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ')'
-  }
-
   this.info = {
     unit: null,
+    owner: 0, // 0 -> no owner, other number -> owner id
     city: false,
     resources: Math.round(Math.random() * 9) // between 0-9
   }
@@ -57,7 +51,7 @@ Hexagon.prototype.draw = function (ctx) {
   ctx.save()
   ctx.beginPath()
   drawPolygon(ctx, this.polygon)
-  ctx.fillStyle = this.resourceColors[this.info.resources]
+  ctx.fillStyle = applyResourceColorization(playerColors[this.info.owner], this.info.resources)
   ctx.strokeStyle = '#000000'
   ctx.lineWidth = 2
   ctx.stroke()
@@ -117,6 +111,14 @@ function drawPolygon (c, polygon) {
   for (var i = 1; i < polygon.length; i++) c.lineTo(polygon[i].x, polygon[i].y)
   c.lineTo(polygon[0].x, polygon[0].y)
   c.closePath()
+}
+
+// darken color(in rgb)
+function applyResourceColorization (color, resourceValue) {
+  var r = color.r - resourceValue * 10
+  var g = color.g - resourceValue * 10
+  var b = color.b - resourceValue * 10
+  return 'rgb(' + r + ',' + g + ',' + b + ')'
 }
 
 module.exports = Hexagon
