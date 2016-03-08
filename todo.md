@@ -11,10 +11,10 @@
 
 ## Low priority
 
-- refactor keyboard to module
-- unhighlight by right-clicking
 - in move-mode: show reachable tiles graphically
-- animation for unit movement, getting territory
+- unhighlight by right-clicking
+- animation for unit movement
+- animation for getting territory
 
 ## Done
 - basic units
@@ -27,4 +27,5 @@
 - turn-based
 - player class
 - getting resources and displaying them
+- refactor keyboard to module
 - highlighting tile borders instead of overlay

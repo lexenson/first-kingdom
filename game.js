@@ -124,6 +124,11 @@ function draw (dt) {
   var hightlightedHex = game.world.getHightlightedHexagon()
   if (hightlightedHex) hightlightedHex.drawHighlight(ctx, dt)
 
+  // drawing overlay on reachable tiles
+  if (game.mode === 'move') {
+    if (hightlightedHex) hightlightedHex.drawReachableHighlight(ctx, game.world)
+  }
+
   hud.draw(ctx)
 }
 

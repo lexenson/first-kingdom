@@ -31,6 +31,10 @@ World.prototype.getHexagonFromPixel = function (x, y) {
   return this.hexagons[pos.x + ',' + pos.y]
 }
 
+World.prototype.getHexagonFromCoordinate = function (x, y) {
+  return this.hexagons[x + ',' + y]
+}
+
 World.prototype.unhighlightAll = function () {
   for (var tileIndex in this.hexagons) {
     this.hexagons[tileIndex].highlighted = false
