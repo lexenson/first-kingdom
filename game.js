@@ -34,7 +34,7 @@ keyboard.on('keydown', function (key) {
 
   // mode-specific commands
   if (game.mode === 'default') {
-    if (key === 'M' && currentHex.info.unit) game.mode = 'move'
+    if (key === 'M' && currentHex && currentHex.info.unit) game.mode = 'move'
   } else if (game.mode === 'move') {
     if (key === 'M') game.mode = 'default'
   }
@@ -75,11 +75,12 @@ function nextTurn () {
 function main () {
   now = timestamp()
   dt = (now - last) / 1000 // in ms
+  totalTime += dt
   while (dt > step) {
     dt = dt - step
     update(dt)
   }
-  draw(dt)
+  draw(totalTime)
 
   last = now
 
@@ -119,6 +120,10 @@ function draw (dt) {
     }
   }
 
+  // drawing the highlight on selected hexagon
+  var hightlightedHex = game.world.getHightlightedHexagon()
+  if (hightlightedHex) hightlightedHex.drawHighlight(ctx, dt)
+
   hud.draw(ctx)
 }
 
@@ -129,4 +134,5 @@ function timestamp () {
 var now, dt
 var step = 1 / 60
 var last = timestamp()
+var totalTime = 0
 window.requestAnimationFrame(main)

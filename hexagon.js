@@ -16,7 +16,7 @@ function Hexagon (x, y, z) {
   this.width = (Math.sqrt(3) / 2) * this.height
 
   this.color = '#fff'
-  this.highlightColor = 'rgba(226, 193, 53, 0.4)'
+  // this.highlightColor = 'rgba(226, 193, 53, 0.4)'
 
   this.highlighted = false
 
@@ -62,16 +62,23 @@ Hexagon.prototype.draw = function (ctx) {
   if (this.info.unit) {
     this.info.unit.draw(ctx)
   }
+}
 
-  if (this.highlighted) {
-    ctx.save()
-    ctx.beginPath()
-    drawPolygon(ctx, this.polygon)
-    ctx.fillStyle = this.highlightColor
-    ctx.fill()
-    ctx.closePath()
-    ctx.restore()
-  }
+Hexagon.prototype.drawHighlight = function (ctx, time) {
+  // set pulsating lineWidth
+  var averageLineWidth = 3
+  var lineWidthRange = 2
+  var highlightBlinkRate = 4
+  var lineWidth = Math.round(Math.sin(time * highlightBlinkRate) * lineWidthRange) + averageLineWidth
+
+  ctx.save()
+  ctx.beginPath()
+  drawPolygon(ctx, this.polygon)
+  ctx.strokeStyle = '#fff'
+  ctx.lineWidth = lineWidth
+  ctx.stroke()
+  ctx.closePath()
+  ctx.restore()
 }
 
 Hexagon.prototype.getPixel = function () {

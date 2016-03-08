@@ -11,7 +11,6 @@
 
 ## Low priority
 
-- highlighting tile borders instead of overlay
 - refactor keyboard to module
 - unhighlight by right-clicking
 - in move-mode: show reachable tiles graphically
@@ -28,3 +27,4 @@
 - turn-based
 - player class
 - getting resources and displaying them
+- highlighting tile borders instead of overlay
