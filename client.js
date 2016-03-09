@@ -4,12 +4,10 @@ var socket
 
 var client = {
   connect: connect,
-  sendChanges: sendChanges,
+  setReady: setReady,
+  receiveStart: receiveStart,
+  sendOrders: sendOrders,
   receiveChanges: receiveChanges
-}
-
-function sendChanges (changes) {
-  socket.send(changes)
 }
 
 function connect (serverURL, cb) {
@@ -19,9 +17,23 @@ function connect (serverURL, cb) {
   })
 }
 
+function setReady () {
+  socket.emit('ready')
+}
+
+function receiveStart (cb) {
+  socket.on('start', function (game) {
+    cb(game)
+  })
+}
+
+function sendOrders (orders) {
+  socket.emit('orders', orders)
+}
+
 function receiveChanges (cb) {
-  socket.on('message', function () {
-    cb()
+  socket.on('changes', function (changes) {
+    cb(changes)
   })
 }
 
