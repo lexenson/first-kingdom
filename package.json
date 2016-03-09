@@ -22,6 +22,7 @@
     "wzrd": "^1.3.1"
   },
   "dependencies": {
-    "crtrdg-keyboard": "^1.0.1"
+    "crtrdg-keyboard": "^1.0.1",
+    "socket.io-client": "^1.4.5"
   }
 }
