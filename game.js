@@ -109,7 +109,7 @@ function update (dt) {
   }
 }
 
-function draw (dt) {
+function draw (totalTime) {
   // clears the context in preparation for redrawing
   ctx.fillStyle = '#D8D3D0'
   ctx.fillRect(0, 0, canvas.width, canvas.height)
@@ -122,12 +122,13 @@ function draw (dt) {
 
   // drawing the highlight on selected hexagon
   var hightlightedHex = game.world.getHightlightedHexagon()
-  if (hightlightedHex) hightlightedHex.drawHighlight(ctx, dt)
 
   // drawing overlay on reachable tiles
   if (game.mode === 'move') {
     if (hightlightedHex) hightlightedHex.drawReachableHighlight(ctx, game.world)
   }
+
+  if (hightlightedHex) hightlightedHex.drawHighlight(ctx, totalTime)
 
   hud.draw(ctx)
 }

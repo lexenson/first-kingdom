@@ -63,3 +63,14 @@ staedte generieren automatisch doerfer, man gibt nur grobe anweisungen
 - Unity of Command inspiration
 - territory is acquired by moving a unit on a tile
 - all tiles are owned by no one in the beginning
+
+____
+
+- In the beginning there are not enough resources to build buildings.
+- Limits for units depending on number of villages
+- Villages are on the corners (essential?) and you are moving units there to make them yours
+- You get resources from the villages, if the surrounding hexagons are your territory
+- You first village is your capital, all villages need to have a connection to your capital
+- You are only getting resources from the villages, that are connected
+- Maybe supplying units is important as well
+- Maybe new villages are builded automatically, and streets

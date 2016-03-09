@@ -66,10 +66,10 @@ Hexagon.prototype.draw = function (ctx) {
 
 Hexagon.prototype.drawHighlight = function (ctx, time) {
   // set pulsating lineWidth
-  var averageLineWidth = 3
-  var lineWidthRange = 2
-  var highlightBlinkRate = 4
-  var lineWidth = Math.round(Math.sin(time * highlightBlinkRate) * lineWidthRange) + averageLineWidth
+  var averageLineWidth = 3.5
+  var lineWidthRange = 1.5
+  var highlightBlinkRate = 5
+  var lineWidth = Math.sin(time * highlightBlinkRate) * lineWidthRange + averageLineWidth
 
   ctx.save()
   ctx.beginPath()
@@ -172,13 +172,15 @@ Hexagon.prototype.getNeighbors = function (world) {
     var neighborCoordinate = neigborCoordinates[dir]
     var x = neighborCoordinate.x
     var y = neighborCoordinate.y
-    neighbors[dir] = world.getHexagonFromCoordinate(x, y)
+
+    var hex = world.getHexagonFromCoordinate(x, y)
+    if (hex) neighbors[dir] = hex
   }
 
   return neighbors
 }
 
-// returns a list of reachable hexagons
+// returns a list of reachable hexagons; n is the range
 Hexagon.prototype.getReachableTiles = function (world, n) {
   // get tiles that are within distance
   var tilesWithinRange = []
@@ -213,6 +215,7 @@ Hexagon.prototype.getReachableTiles = function (world, n) {
       }
     }
 
+    // delete distance property only used for bfs
     for (var l = 0; l < tilesWithinRange.length; l++) {
       var hex = tilesWithinRange[l]
       delete hex.distance
