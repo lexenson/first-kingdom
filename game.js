@@ -18,13 +18,17 @@ var game = {
   turn: 1
 }
 
+// States:
+// - 'menu'
+// - 'playing'
+var state = 'menu'
+
 var hud = new HUD(game)
 
 var menu = new Menu(0, 100, 100, 100, '#000', '#fff', '#777', 'Arial', keyboard)
-menu.addItem('Start', function () {console.log(menu.items[menu.selectedItemIndex].text)})
-menu.addItem('Options', function () {console.log(menu.items[menu.selectedItemIndex].text)})
-menu.addItem('Quit', function () {console.log(menu.items[menu.selectedItemIndex].text)})
-menu.input()
+menu.addItem('Start', function () {
+  state = 'playing'
+})
 
 init()
 
@@ -36,38 +40,53 @@ document.body.appendChild(canvas)
 var ctx = canvas.getContext('2d')
 
 // keyboard input
-keyboard.on('keydown', function (key) {
-  var currentHex = game.world.getHightlightedHexagon()
+keyboard.on('keyup', function (key) {
+  if (state === 'playing') {
+    var currentHex = game.world.getHightlightedHexagon()
 
-  // mode-specific commands
-  if (game.mode === 'default') {
-    if (key === 'M' && currentHex && currentHex.info.unit) game.mode = 'move'
-  } else if (game.mode === 'move') {
-    if (key === 'M') game.mode = 'default'
+    // mode-specific commands
+    if (game.mode === 'default') {
+      if (key === 'M' && currentHex && currentHex.info.unit) game.mode = 'move'
+    } else if (game.mode === 'move') {
+      if (key === 'M') game.mode = 'default'
+    }
+
+    // general commands
+    if (key === '<enter>') {
+      nextTurn()
+    }
   }
+})
 
-  // general commands
-  if (key === '<enter>') {
-    nextTurn()
+keyboard.on('keydown', function (key) {
+  if (state === 'menu') {
+    if (key === '<down>') menu.down()
+    if (key === '<up>') menu.up()
+    if (key === '<enter>') menu.select()
+    if (key === '<escape>') state = 'playing'
+  } else if (state === 'playing') {
+    if (key === '<escape>') state = 'menu'
   }
 })
 
 // mouse input
 document.onmouseup = function (e) {
-  var hex = game.world.getHexagonFromPixel(e.pageX, e.pageY)
-  if (game.mode === 'move' && hex) {
-    var lastHex = game.world.getHightlightedHexagon()
-    if (lastHex && lastHex.info.unit && lastHex.isAdjacent(hex)) {
-      if (!hex.info.unit) {
-        lastHex.info.unit.moveTo(hex)
-        game.world.unhighlightAll()
-        hex.highlighted = true
+  if (state === 'playing') {
+    var hex = game.world.getHexagonFromPixel(e.pageX, e.pageY)
+    if (game.mode === 'move' && hex) {
+      var lastHex = game.world.getHightlightedHexagon()
+      if (lastHex && lastHex.info.unit && lastHex.isAdjacent(hex)) {
+        if (!hex.info.unit) {
+          lastHex.info.unit.moveTo(hex)
+          game.world.unhighlightAll()
+          hex.highlighted = true
+        }
       }
     }
-  }
-  if (game.mode === 'default') {
-    game.world.unhighlightAll()
-    if (hex && hex.info.unit) hex.highlighted = true
+    if (game.mode === 'default') {
+      game.world.unhighlightAll()
+      if (hex && hex.info.unit) hex.highlighted = true
+    }
   }
 }
 
@@ -107,11 +126,13 @@ function init () {
 }
 
 function update (dt) {
-  hud.update(dt)
+  if (state === 'playing') {
+    hud.update(dt)
 
-  for (var i = 0; i < game.objects.length; i++) {
-    if (game.objects[i].update) {
-      game.objects[i].update(dt)
+    for (var i = 0; i < game.objects.length; i++) {
+      if (game.objects[i].update) {
+        game.objects[i].update(dt)
+      }
     }
   }
 }
@@ -121,24 +142,27 @@ function draw (totalTime) {
   ctx.fillStyle = '#D8D3D0'
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-  for (var i = 0; i < game.objects.length; i++) {
-    if (game.objects[i].draw) {
-      game.objects[i].draw(ctx)
+  if (state === 'playing') {
+    for (var i = 0; i < game.objects.length; i++) {
+      if (game.objects[i].draw) {
+        game.objects[i].draw(ctx)
+      }
     }
+
+    // drawing the highlight on selected hexagon
+    var hightlightedHex = game.world.getHightlightedHexagon()
+
+    // drawing overlay on reachable tiles
+    if (game.mode === 'move') {
+      if (hightlightedHex) hightlightedHex.drawReachableHighlight(ctx, game.world)
+    }
+
+    if (hightlightedHex) hightlightedHex.drawHighlight(ctx, totalTime)
+
+    hud.draw(ctx)
+  } else if (state === 'menu') {
+    menu.draw(ctx, totalTime)
   }
-
-  // drawing the highlight on selected hexagon
-  var hightlightedHex = game.world.getHightlightedHexagon()
-
-  // drawing overlay on reachable tiles
-  if (game.mode === 'move') {
-    if (hightlightedHex) hightlightedHex.drawReachableHighlight(ctx, game.world)
-  }
-
-  if (hightlightedHex) hightlightedHex.drawHighlight(ctx, totalTime)
-
-  hud.draw(ctx)
-  menu.draw(ctx, totalTime)
 }
 
 function timestamp () {
