@@ -1,6 +1,8 @@
 var createKeyboard = require('crtrdg-keyboard')
 var keyboard = createKeyboard()
 
+var client = require('./client.js')
+
 var World = require('./world.js')
 var Player = require('./player.js')
 var Unit = require('./unit.js')
@@ -15,19 +17,39 @@ var game = {
   height: window.innerHeight,
   objects: [],
   players: [],
-  turn: 1
+  turn: 1,
+  connected: false
 }
 
 // States:
 // - 'menu'
 // - 'playing'
+// - 'waiting'
 var state = 'menu'
 
 var hud = new HUD(game)
 
+var serverURL = 'http://localhost:8080'
+
 var menu = new Menu(0, 100, 100, 100, '#000', '#fff', '#777', 'Arial', keyboard)
 menu.addItem('Start', function () {
-  state = 'playing'
+  client.setReady()
+  state = 'waiting'
+})
+menu.addItem('Connect', function () {
+  client.connect(serverURL, function () {
+    console.log('start connect')
+    game.connected = true
+    client.receiveStart(function (game) {
+      console.log('receive start')
+      console.log(game)
+      state = 'playing'
+    })
+    client.receiveChanges(function (changes) {
+      console.log(changes)
+      state = 'playing'
+    })
+  })
 })
 
 init()
@@ -93,8 +115,8 @@ document.onmouseup = function (e) {
 // additional game logic
 
 function nextTurn () {
-  game.turn++
-  game.world.distributeResources()
+  client.sendOrders([]) // TODO: implement orders
+  state = 'waiting'
 }
 
 // main game functions
