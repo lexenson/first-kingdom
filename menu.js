@@ -1,5 +1,5 @@
-function Menu (items, x, y, width, height, textColor, highlightColor, backgroundColor, font, keyboard) {
-  this.items = items
+function Menu (x, y, width, height, textColor, highlightColor, backgroundColor, font, keyboard) {
+  this.items = []
   this.selectedItemIndex = 0
   this.x = x
   this.y = y
@@ -13,7 +13,8 @@ function Menu (items, x, y, width, height, textColor, highlightColor, background
 }
 
 Menu.prototype.draw = function (ctx, time) {
-  var itemSize = Math.floor(0.8 * this.height / this.items.length)
+  var itemSize = this.height / this.items.length
+  var textSize = Math.floor(0.8 * itemSize)
   ctx.save()
   // draw background
   ctx.fillStyle = this.backgroundColor
@@ -22,7 +23,7 @@ Menu.prototype.draw = function (ctx, time) {
   // draw items
   ctx.textBaseline = 'top'
   ctx.fillStyle = this.textColor
-  ctx.font = itemSize.toString() + 'px ' + this.font
+  ctx.font = textSize.toString() + 'px ' + this.font
   for (var i = 0; i < this.items.length; i++) {
     var item = this.items[i]
 
@@ -36,20 +37,28 @@ Menu.prototype.draw = function (ctx, time) {
 }
 
 Menu.prototype.input = function () {
-  var menu = this
+  var self = this
   this.keyboard.on('keydown', function (key) {
     if (key === '<down>') {
-      menu.selectedItemIndex = (menu.selectedItemIndex + 1) % menu.items.length
+      self.selectedItemIndex = (self.selectedItemIndex + 1) % self.items.length
     }
 
     if (key === '<up>') {
-      menu.selectedItemIndex = (((menu.selectedItemIndex - 1) % menu.items.length) + menu.items.length) % menu.items.length
+      self.selectedItemIndex = (((self.selectedItemIndex - 1) % self.items.length) + self.items.length) % self.items.length
     }
 
     if (key === '<enter>') {
-      menu.items[menu.selectedItemIndex].action()
+      self.items[self.selectedItemIndex].action()
     }
   })
+}
+
+Menu.prototype.addItem = function (text, action) {
+  var item = {
+    text: text,
+    action: action
+  }
+  this.items.push(item)
 }
 
 module.exports = Menu

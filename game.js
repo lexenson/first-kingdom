@@ -1,9 +1,11 @@
 var createKeyboard = require('crtrdg-keyboard')
+var keyboard = createKeyboard()
 
 var World = require('./world.js')
 var Player = require('./player.js')
 var Unit = require('./unit.js')
 var HUD = require('./hud.js')
+var Menu = require('./menu.js')
 
 // Global game object
 var game = {
@@ -18,6 +20,12 @@ var game = {
 
 var hud = new HUD(game)
 
+var menu = new Menu(0, 100, 100, 100, '#000', '#fff', '#777', 'Arial', keyboard)
+menu.addItem('Start', function () {console.log(menu.items[menu.selectedItemIndex].text)})
+menu.addItem('Options', function () {console.log(menu.items[menu.selectedItemIndex].text)})
+menu.addItem('Quit', function () {console.log(menu.items[menu.selectedItemIndex].text)})
+menu.input()
+
 init()
 
 // Creating canvas
@@ -28,7 +36,6 @@ document.body.appendChild(canvas)
 var ctx = canvas.getContext('2d')
 
 // keyboard input
-var keyboard = createKeyboard()
 keyboard.on('keydown', function (key) {
   var currentHex = game.world.getHightlightedHexagon()
 
@@ -131,6 +138,7 @@ function draw (totalTime) {
   if (hightlightedHex) hightlightedHex.drawHighlight(ctx, totalTime)
 
   hud.draw(ctx)
+  menu.draw(ctx, totalTime)
 }
 
 function timestamp () {
