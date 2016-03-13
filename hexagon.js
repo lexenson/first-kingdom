@@ -1,4 +1,3 @@
-var unit = require('./unit.js')
 var world = require('./world.js')
 
 // pointy-topped hexagon
@@ -26,7 +25,6 @@ exports.createModel = function (x, y, z) {
   hexModel.highlighted = false
 
   hexModel.info = {
-    unitModel: null,
     owner: 0, // 0 -> no owner, other number -> owner id
     city: false,
     resources: Math.round(Math.random() * 9) // between 0-9
@@ -65,10 +63,6 @@ function draw (hexModel, ctx) {
   ctx.fill()
   ctx.closePath()
   ctx.restore()
-
-  if (hexModel.info.unitModel) {
-    unit.draw(hexModel.info.unitModel, ctx)
-  }
 }
 
 function drawHighlight (hexModel, ctx, time) {

@@ -44,12 +44,15 @@ menu.addItem('Start', function () {
 menu.addItem('Connect', function () {
   client.connect(serverURL, function () {
     game.connected = true
-    client.receiveStart(function (worldModel) {
-      model.worldModel = worldModel
-      init()
+    client.receiveStart(function (serverModel) {
+      model = serverModel
       state = 'playing'
     })
-    client.receiveChanges(function (changes) {
+    client.receiveChanges(function (serverModel) {
+      console.log(serverModel)
+      model = serverModel
+      world.unhighlightAll(model.worldModel)
+      game.mode = 'default'
       state = 'playing'
     })
   })
@@ -69,7 +72,12 @@ keyboard.on('keyup', function (key) {
 
     // mode-specific commands
     if (game.mode === 'default') {
-      if (key === 'M' && currentHex && currentHex.info.unitModel) game.mode = 'move'
+      if (key === 'M' && currentHex) {
+        var unitModelAtHex = player.getUnitFromCoordinate(model.playerModels[0], currentHex.x, currentHex.y, currentHex.z)
+        if (unitModelAtHex) {
+          game.mode = 'move'
+        }
+      }
     } else if (game.mode === 'move') {
       if (key === 'M') game.mode = 'default'
     }
@@ -96,11 +104,13 @@ keyboard.on('keydown', function (key) {
 document.onmouseup = function (e) {
   if (state === 'playing') {
     var hexModel = world.getHexagonFromPixel(model.worldModel, e.pageX, e.pageY)
+    var unitModel = player.getUnitFromCoordinate(model.playerModels[0], hexModel.x, hexModel.y, hexModel.z)
     if (game.mode === 'move' && hexModel) {
       var lastHexModel = world.getHightlightedHexagon(model.worldModel)
-      if (lastHexModel && lastHexModel.info.unitModel && hexagon.isAdjacent(lastHexModel, hexModel)) {
-        if (!hexModel.info.unitModel) {
-          unit.moveTo(lastHexModel.info.unitModel, hexModel, game.orders)
+      var lastUnitModel = player.getUnitFromCoordinate(model.playerModels[0], lastHexModel.x, lastHexModel.y, lastHexModel.z)
+      if (lastHexModel && lastUnitModel && hexagon.isAdjacent(lastHexModel, hexModel)) {
+        if (!unitModel) {
+          unit.orderTo(lastUnitModel, hexModel, game.orders)
           world.unhighlightAll(model.worldModel)
           hexModel.highlighted = true
         }
@@ -108,7 +118,7 @@ document.onmouseup = function (e) {
     }
     if (game.mode === 'default') {
       world.unhighlightAll(model.worldModel)
-      if (hexModel && hexModel.info.unitModel) hexModel.highlighted = true
+      if (hexModel && unitModel) hexModel.highlighted = true
     }
   }
 }
@@ -137,20 +147,10 @@ function main () {
   window.requestAnimationFrame(main)
 }
 
-function init () {
-  model.playerModels.push(player.createModel(1))
-
-  var hexModel = world.getHexagonFromCoordinate(model.worldModel, 0, 0)
-  var unitModel = unit.createModel(hexModel, 1)
-
-  player.addUnit(model.playerModels[0], unitModel)
-}
-
 function update (dt) {
   if (state === 'playing') {
     hud.update(dt)
 
-    world.update(model.worldModel, dt)
     // for (var i = 0; i < game.objects.length; i++) {
     //   if (game.objects[i].update) {
     //     game.objects[i].update(dt)
@@ -171,7 +171,15 @@ function draw (totalTime) {
     //   }
     // }
     world.draw(model.worldModel, ctx)
-    unit.draw(model.playerModels[0].unitModels[0], ctx)
+
+    // unit drawing
+    model.playerModels.forEach(function (playerModel) {
+      playerModel.unitModels.forEach(function (unitModel) {
+        unit.draw(unitModel, model.worldModel, ctx)
+      })
+    })
+
+
 
     // drawing the highlight on selected hexagon
     var hightlightedHexModel = world.getHightlightedHexagon(model.worldModel)

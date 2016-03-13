@@ -11,15 +11,6 @@ exports.createModel = function (width, height) {
   return worldModel
 }
 
-exports.update = function (worldModel, dt) {
-  for (var index in worldModel.hexagons) {
-    var hexModel = worldModel.hexagons[index]
-    if (hexModel.info.unitModel) {
-      hexModel.info.owner = hexModel.info.unitModel.playerId
-    }
-  }
-}
-
 exports.draw = function (worldModel, ctx) {
   for (var index in worldModel.hexagons) {
     hexagon.draw(worldModel.hexagons[index], ctx)
