@@ -1,11 +1,14 @@
-function Player (id) {
-  this.id = id
-  this.resources = 0
-  this.units = []
+function createModel (id) {
+  var playerModel = {}
+  playerModel.id = id
+  playerModel.resources = 0
+  playerModel.unitModels = []
+  return playerModel
 }
 
-Player.prototype.addUnit = function (unit) {
-  this.units.push(unit)
+function addUnit (playerModel, unitModel) {
+  playerModel.unitModels.push(unitModel)
 }
 
-module.exports = Player
+exports.createModel = createModel
+exports.addUnit = addUnit

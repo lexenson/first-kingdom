@@ -2,6 +2,7 @@
 
 ## High priority
 
+- client/server refactor
 - using resources to build units
 - menus and game states
 - combat system

@@ -1,63 +1,62 @@
-var Hexagon = require('./hexagon.js')
+var hexagon = require('./hexagon.js')
 
-function World (width, height, game) {
-  this.game = game
-
-  this.hexagons = {}
+exports.createModel = function (width, height) {
+  var worldModel = {}
+  worldModel.hexagons = {}
   for (var x = 0; x < width; x++) {
     for (var y = 0; y < height; y++) {
-      this.hexagons[x + ',' + y] = new Hexagon(x, y, -y - x)
+      worldModel.hexagons[x + ',' + y] = hexagon.createModel(x, y, -y - x)
+    }
+  }
+  return worldModel
+}
+
+exports.update = function (worldModel, dt) {
+  for (var index in worldModel.hexagons) {
+    var hexModel = worldModel.hexagons[index]
+    if (hexModel.info.unitModel) {
+      hexModel.info.owner = hexModel.info.unitModel.playerId
     }
   }
 }
 
-World.prototype.update = function (dt) {
-  for (var index in this.hexagons) {
-    var hex = this.hexagons[index]
-    if (hex.info.unit) {
-      hex.info.owner = hex.info.unit.playerId
-    }
+exports.draw = function (worldModel, ctx) {
+  for (var index in worldModel.hexagons) {
+    hexagon.draw(worldModel.hexagons[index], ctx)
   }
 }
 
-World.prototype.draw = function (ctx) {
-  for (var index in this.hexagons) {
-    this.hexagons[index].draw(ctx)
-  }
-}
-
-World.prototype.getHexagonFromPixel = function (x, y) {
+exports.getHexagonFromPixel = function (worldModel, x, y) {
   var pos = pixelToHex(x, y)
-  return this.hexagons[pos.x + ',' + pos.y]
+  return worldModel.hexagons[pos.x + ',' + pos.y]
 }
 
-World.prototype.getHexagonFromCoordinate = function (x, y) {
-  return this.hexagons[x + ',' + y]
+exports.getHexagonFromCoordinate = function (worldModel, x, y) {
+  return worldModel.hexagons[x + ',' + y]
 }
 
-World.prototype.unhighlightAll = function () {
-  for (var tileIndex in this.hexagons) {
-    this.hexagons[tileIndex].highlighted = false
+exports.unhighlightAll = function (worldModel) {
+  for (var tileIndex in worldModel.hexagons) {
+    var hexModel = worldModel.hexagons[tileIndex]
+    hexModel.highlighted = false
   }
 }
 
-World.prototype.getHightlightedHexagon = function () {
-  for (var tileIndex in this.hexagons) {
-    var hex = this.hexagons[tileIndex]
-    if (hex.highlighted) return hex
+exports.getHightlightedHexagon = function (worldModel) {
+  for (var tileIndex in worldModel.hexagons) {
+    var hexModel = worldModel.hexagons[tileIndex]
+    if (hexModel.highlighted) return hexModel
   }
 }
 
-World.prototype.distributeResources = function () {
-  for (var tileIndex in this.hexagons) {
-    var hex = this.hexagons[tileIndex]
-    if (hex.info.owner > 0) {
-      this.game.players[hex.info.owner - 1].resources += hex.info.resources
+exports.distributeResources = function (worldModel, playerModels) {
+  for (var tileIndex in worldModel.hexagons) {
+    var hexModel = worldModel.hexagons[tileIndex]
+    if (hexModel.info.owner > 0) {
+      playerModels[hexModel.info.owner - 1].resources += hexModel.info.resources
     }
   }
 }
-
-module.exports = World
 
 // returns snapped coordinates in 3d hexagonal cube grid
 // hexPos is a point in the 2d axial hexagonal space
@@ -89,13 +88,13 @@ function hexRound (hexPos) {
 // returns coordinates of appropriate hex in 3d grid
 function pixelToHex (x, y) {
   // offset
-  x -= Hexagon.radius + 1
-  y -= Hexagon.radius + 1
+  x -= hexagon.radius + 1
+  y -= hexagon.radius + 1
 
   // converts pixel coordinates to 2d axial hexagonal space
   var res = {}
-  res.x = (x * Math.sqrt(3) / 3 - y / 3) / Hexagon.radius
-  res.y = y * 2 / 3 / Hexagon.radius
+  res.x = (x * Math.sqrt(3) / 3 - y / 3) / hexagon.radius
+  res.y = y * 2 / 3 / hexagon.radius
 
   res = hexRound(res)
 

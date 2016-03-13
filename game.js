@@ -3,21 +3,26 @@ var keyboard = createKeyboard()
 
 var client = require('./client.js')
 
-var World = require('./world.js')
-var Player = require('./player.js')
-var Unit = require('./unit.js')
+var world = require('./world.js')
+var player = require('./player.js')
+var unit = require('./unit.js')
+var hexagon = require('./hexagon.js')
 var HUD = require('./hud.js')
 var Menu = require('./menu.js')
 
 // Global game object
+var model = {
+  worldModel: null,
+  playerModels: []
+}
+
 var game = {
   mode: 'default', // 'move'
-  world: null,
   width: window.innerWidth,
   height: window.innerHeight,
   objects: [],
-  players: [],
   turn: 1,
+  orders: [],
   connected: false
 }
 
@@ -27,7 +32,7 @@ var game = {
 // - 'waiting'
 var state = 'menu'
 
-var hud = new HUD(game)
+var hud = new HUD(model, game)
 
 var serverURL = 'http://localhost:8080'
 
@@ -38,21 +43,17 @@ menu.addItem('Start', function () {
 })
 menu.addItem('Connect', function () {
   client.connect(serverURL, function () {
-    console.log('start connect')
     game.connected = true
-    client.receiveStart(function (game) {
-      console.log('receive start')
-      console.log(game)
+    client.receiveStart(function (worldModel) {
+      model.worldModel = worldModel
+      init()
       state = 'playing'
     })
     client.receiveChanges(function (changes) {
-      console.log(changes)
       state = 'playing'
     })
   })
 })
-
-init()
 
 // Creating canvas
 var canvas = document.createElement('canvas')
@@ -64,11 +65,11 @@ var ctx = canvas.getContext('2d')
 // keyboard input
 keyboard.on('keyup', function (key) {
   if (state === 'playing') {
-    var currentHex = game.world.getHightlightedHexagon()
+    var currentHex = world.getHightlightedHexagon(model.worldModel)
 
     // mode-specific commands
     if (game.mode === 'default') {
-      if (key === 'M' && currentHex && currentHex.info.unit) game.mode = 'move'
+      if (key === 'M' && currentHex && currentHex.info.unitModel) game.mode = 'move'
     } else if (game.mode === 'move') {
       if (key === 'M') game.mode = 'default'
     }
@@ -94,20 +95,20 @@ keyboard.on('keydown', function (key) {
 // mouse input
 document.onmouseup = function (e) {
   if (state === 'playing') {
-    var hex = game.world.getHexagonFromPixel(e.pageX, e.pageY)
-    if (game.mode === 'move' && hex) {
-      var lastHex = game.world.getHightlightedHexagon()
-      if (lastHex && lastHex.info.unit && lastHex.isAdjacent(hex)) {
-        if (!hex.info.unit) {
-          lastHex.info.unit.moveTo(hex)
-          game.world.unhighlightAll()
-          hex.highlighted = true
+    var hexModel = world.getHexagonFromPixel(model.worldModel, e.pageX, e.pageY)
+    if (game.mode === 'move' && hexModel) {
+      var lastHexModel = world.getHightlightedHexagon(model.worldModel)
+      if (lastHexModel && lastHexModel.info.unitModel && hexagon.isAdjacent(lastHexModel, hexModel)) {
+        if (!hexModel.info.unitModel) {
+          unit.moveTo(lastHexModel.info.unitModel, hexModel, game.orders)
+          world.unhighlightAll(model.worldModel)
+          hexModel.highlighted = true
         }
       }
     }
     if (game.mode === 'default') {
-      game.world.unhighlightAll()
-      if (hex && hex.info.unit) hex.highlighted = true
+      world.unhighlightAll(model.worldModel)
+      if (hexModel && hexModel.info.unitModel) hexModel.highlighted = true
     }
   }
 }
@@ -115,7 +116,8 @@ document.onmouseup = function (e) {
 // additional game logic
 
 function nextTurn () {
-  client.sendOrders([]) // TODO: implement orders
+  client.sendOrders(game.orders) // TODO: implement orders
+  game.orders = []
   state = 'waiting'
 }
 
@@ -136,26 +138,24 @@ function main () {
 }
 
 function init () {
-  game.world = new World(12, 12, game) // map
+  model.playerModels.push(player.createModel(1))
 
-  game.players.push(new Player(1))
+  var hexModel = world.getHexagonFromCoordinate(model.worldModel, 0, 0)
+  var unitModel = unit.createModel(hexModel, 1)
 
-  var hex = game.world.hexagons['0,0']
-  var unit = new Unit(hex, 1)
-  game.players[0].addUnit(unit)
-
-  game.objects = [game.world, unit]
+  player.addUnit(model.playerModels[0], unitModel)
 }
 
 function update (dt) {
   if (state === 'playing') {
     hud.update(dt)
 
-    for (var i = 0; i < game.objects.length; i++) {
-      if (game.objects[i].update) {
-        game.objects[i].update(dt)
-      }
-    }
+    world.update(model.worldModel, dt)
+    // for (var i = 0; i < game.objects.length; i++) {
+    //   if (game.objects[i].update) {
+    //     game.objects[i].update(dt)
+    //   }
+    // }
   }
 }
 
@@ -165,21 +165,25 @@ function draw (totalTime) {
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
   if (state === 'playing') {
-    for (var i = 0; i < game.objects.length; i++) {
-      if (game.objects[i].draw) {
-        game.objects[i].draw(ctx)
-      }
-    }
+    // for (var i = 0; i < game.objects.length; i++) {
+    //   if (game.objects[i].draw) {
+    //     game.objects[i].draw(ctx)
+    //   }
+    // }
+    world.draw(model.worldModel, ctx)
+    unit.draw(model.playerModels[0].unitModels[0], ctx)
 
     // drawing the highlight on selected hexagon
-    var hightlightedHex = game.world.getHightlightedHexagon()
+    var hightlightedHexModel = world.getHightlightedHexagon(model.worldModel)
 
     // drawing overlay on reachable tiles
     if (game.mode === 'move') {
-      if (hightlightedHex) hightlightedHex.drawReachableHighlight(ctx, game.world)
+      if (hightlightedHexModel) {
+        hexagon.drawReachableHighlight(hightlightedHexModel, ctx, model.worldModel)
+      }
     }
 
-    if (hightlightedHex) hightlightedHex.drawHighlight(ctx, totalTime)
+    if (hightlightedHexModel) hexagon.drawHighlight(hightlightedHexModel, ctx, totalTime)
 
     hud.draw(ctx)
   } else if (state === 'menu') {

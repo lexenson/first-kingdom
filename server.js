@@ -1,6 +1,13 @@
 var socketio = require('socket.io')
 
+var world = require('./world.js')
+
 var io = socketio()
+
+function initializeGame() {
+  var worldModel = world.createModel(12, 12)
+  return worldModel
+}
 
 function getSockets () {
   var sockets = []
@@ -23,12 +30,13 @@ io.on('connection', function (socket) {
     })
     if (allReady) {
       // initialize Game
-      var game = {}
-      io.sockets.emit('start', game)
+      var worldModel = initializeGame()
+      io.sockets.emit('start', worldModel)
     }
   })
 
   socket.on('orders', function (orders) {
+    console.log(orders)
     socket.orders = orders
     var allOrdersSent = getSockets().every(function (s) {
       return !!s.orders
@@ -36,6 +44,7 @@ io.on('connection', function (socket) {
     if (allOrdersSent) {
       // calculateNewGameState() with all socket orders
       var changes = [] // populate with changes
+
       getSockets().forEach(function (s) {
         s.orders = null
       })

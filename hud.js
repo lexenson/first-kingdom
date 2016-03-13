@@ -1,5 +1,6 @@
-function HUD (game) {
+function HUD (model, game) {
   this.game = game
+  this.model = model
 
   this.texts = []
 
@@ -14,7 +15,7 @@ HUD.prototype.update = function (dt) {
     'FIRST KINGDOM',
     'mode: ' + this.game.mode,
     'turn:' + this.game.turn,
-    'P1 resources: ' + this.game.players[0].resources
+    'P1 resources: ' + this.model.playerModels[0].resources
   ]
   this.pos.y = this.game.height - this.texts.length * 15
 }

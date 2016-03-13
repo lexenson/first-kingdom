@@ -1,3 +1,6 @@
+var unit = require('./unit.js')
+var world = require('./world.js')
+
 // pointy-topped hexagon
 
 var playerColors = [
@@ -6,52 +9,56 @@ var playerColors = [
   {r: 110, g: 110, b: 255}
 ]
 
-function Hexagon (x, y, z) {
-  this.x = x
-  this.y = y
-  this.z = z
+exports.createModel = function (x, y, z) {
+  var hexModel = {}
 
-  this.radius = 40
-  this.height = this.radius * 2
-  this.width = (Math.sqrt(3) / 2) * this.height
+  hexModel.x = x
+  hexModel.y = y
+  hexModel.z = z
 
-  this.color = '#fff'
-  this.highlightColor = 'rgba(226, 193, 53, 0.4)'
+  hexModel.radius = 40
+  hexModel.height = hexModel.radius * 2
+  hexModel.width = (Math.sqrt(3) / 2) * hexModel.height
 
-  this.highlighted = false
+  hexModel.color = '#fff'
+  hexModel.highlightColor = 'rgba(226, 193, 53, 0.4)'
 
-  this.info = {
-    unit: null,
+  hexModel.highlighted = false
+
+  hexModel.info = {
+    unitModel: null,
     owner: 0, // 0 -> no owner, other number -> owner id
     city: false,
     resources: Math.round(Math.random() * 9) // between 0-9
   }
 
   // polygon corners in pixel coordinates
-  this.polygon = []
-  var p = this.getPixel()
+  hexModel.polygon = []
+  var p = getPixel(hexModel)
   for (var i = 0; i < 6; i++) {
-    this.polygon.push(
+    hexModel.polygon.push(
       {
-        x: this.radius * Math.cos(i * 1 / 3 * Math.PI + 1 / 6 * Math.PI) + p.x,
-        y: this.radius * Math.sin(i * 1 / 3 * Math.PI + 1 / 6 * Math.PI) + p.y
+        x: hexModel.radius * Math.cos(i * 1 / 3 * Math.PI + 1 / 6 * Math.PI) + p.x,
+        y: hexModel.radius * Math.sin(i * 1 / 3 * Math.PI + 1 / 6 * Math.PI) + p.y
       }
     )
   }
+
+  return hexModel
 }
 
-Hexagon.radius = 40
+var radius = 40
 
-Hexagon.offset = {
-  x: Hexagon.radius,
-  y: Hexagon.radius + 1
+var offset = {
+  x: radius,
+  y: radius + 1
 }
 
-Hexagon.prototype.draw = function (ctx) {
+function draw (hexModel, ctx) {
   ctx.save()
   ctx.beginPath()
-  drawPolygon(ctx, this.polygon)
-  ctx.fillStyle = applyResourceColorization(playerColors[this.info.owner], this.info.resources)
+  drawPolygon(ctx, hexModel.polygon)
+  ctx.fillStyle = applyResourceColorization(playerColors[hexModel.info.owner], hexModel.info.resources)
   ctx.strokeStyle = '#000000'
   ctx.lineWidth = 2
   ctx.stroke()
@@ -59,12 +66,12 @@ Hexagon.prototype.draw = function (ctx) {
   ctx.closePath()
   ctx.restore()
 
-  if (this.info.unit) {
-    this.info.unit.draw(ctx)
+  if (hexModel.info.unitModel) {
+    unit.draw(hexModel.info.unitModel, ctx)
   }
 }
 
-Hexagon.prototype.drawHighlight = function (ctx, time) {
+function drawHighlight (hexModel, ctx, time) {
   // set pulsating lineWidth
   var averageLineWidth = 3.5
   var lineWidthRange = 1.5
@@ -73,7 +80,7 @@ Hexagon.prototype.drawHighlight = function (ctx, time) {
 
   ctx.save()
   ctx.beginPath()
-  drawPolygon(ctx, this.polygon)
+  drawPolygon(ctx, hexModel.polygon)
   ctx.strokeStyle = '#fff'
   ctx.lineWidth = lineWidth
   ctx.stroke()
@@ -81,13 +88,13 @@ Hexagon.prototype.drawHighlight = function (ctx, time) {
   ctx.restore()
 }
 
-Hexagon.prototype.drawReachableHighlight = function (ctx, world) {
-  var reachableTiles = this.getReachableTiles(world, 1)
-  reachableTiles.push(this)
+function drawReachableHighlight (hexModel, ctx, worldModel) {
+  var reachableTiles = getReachableTiles(hexModel, worldModel, 1)
+  reachableTiles.push(hexModel)
 
   for (var i = 0; i < reachableTiles.length; i++) {
     var h = reachableTiles[i]
-    var neighbors = h.getNeighbors(world)
+    var neighbors = getNeighbors(h, worldModel)
 
     // drawing lines between reachable and unreachable hexagons
     ctx.save()
@@ -139,18 +146,18 @@ Hexagon.prototype.drawReachableHighlight = function (ctx, world) {
   }
 }
 
-Hexagon.prototype.getPixel = function () {
+function getPixel (hexModel) {
   var p = {}
-  p.x = this.radius * Math.sqrt(3) * (this.x + this.y / 2) + Hexagon.offset.x
-  p.y = this.radius * 3 / 2 * this.y + Hexagon.offset.y
+  p.x = hexModel.radius * Math.sqrt(3) * (hexModel.x + hexModel.y / 2) + offset.x
+  p.y = hexModel.radius * 3 / 2 * hexModel.y + offset.y
   return p
 }
 
 // returns an object with the coordinates of the neighbours of hexagon a
-Hexagon.prototype.getNeighborCoordinates = function () {
-  var x = this.x
-  var y = this.y
-  var z = this.z
+function getNeighborCoordinates (hexModel) {
+  var x = hexModel.x
+  var y = hexModel.y
+  var z = hexModel.z
 
   var res = {
     'topRight': {x: x + 1, y: y, z: z - 1},
@@ -165,28 +172,36 @@ Hexagon.prototype.getNeighborCoordinates = function () {
 }
 
 // returns an object with the neighboring hexagons
-Hexagon.prototype.getNeighbors = function (world) {
-  var neigborCoordinates = this.getNeighborCoordinates()
+function getNeighbors (hexModel, worldModel) {
+  var neigborCoordinates = getNeighborCoordinates(hexModel)
   var neighbors = {}
   for (var dir in neigborCoordinates) {
     var neighborCoordinate = neigborCoordinates[dir]
     var x = neighborCoordinate.x
     var y = neighborCoordinate.y
 
-    var hex = world.getHexagonFromCoordinate(x, y)
+    var hex = world.getHexagonFromCoordinate(worldModel, x, y)
     if (hex) neighbors[dir] = hex
   }
 
   return neighbors
 }
 
+function isAdjacent (hexModel, otherHexModel) {
+  return getDistance(hexModel, otherHexModel) === 1
+}
+
+function getDistance (hexModel, otherHexModel) {
+  return (Math.abs(hexModel.x - otherHexModel.x) + Math.abs(hexModel.y - otherHexModel.y) + Math.abs(hexModel.z - otherHexModel.z)) / 2
+}
+
 // returns a list of reachable hexagons; n is the range
-Hexagon.prototype.getReachableTiles = function (world, n) {
+function getReachableTiles (hexModel, worldModel, n) {
   // get tiles that are within distance
   var tilesWithinRange = []
-  var hexagons = world.hexagons
+  var hexagons = worldModel.hexagons
   for (var i in hexagons) {
-    var dist = this.getDistance(hexagons[i])
+    var dist = getDistance(hexModel, hexagons[i])
     if (dist > 0 && dist <= n) {
       tilesWithinRange.push(hexagons[i])
     }
@@ -200,14 +215,14 @@ Hexagon.prototype.getReachableTiles = function (world, n) {
       tilesWithinRange[j].distance = Infinity
     }
 
-    this.distance = 0
-    var q = [this]
+    hexModel.distance = 0
+    var q = [hexModel]
     while (q.length > 0) {
       var current = q.shift()
 
       for (var k = 0; k < tilesWithinRange.length; k++) {
         var node = tilesWithinRange[k]
-        if (current.isAdjacent(node) && node.distance === Infinity) {
+        if (isAdjacent(current, node) && node.distance === Infinity) {
           node.distance = current.distance + 1
           reachableTiles.push(node)
           q.push(node)
@@ -223,14 +238,6 @@ Hexagon.prototype.getReachableTiles = function (world, n) {
 
     return reachableTiles
   }
-}
-
-Hexagon.prototype.isAdjacent = function (otherHex) {
-  return this.getDistance(otherHex) === 1
-}
-
-Hexagon.prototype.getDistance = function (otherHex) {
-  return (Math.abs(this.x - otherHex.x) + Math.abs(this.y - otherHex.y) + Math.abs(this.z - otherHex.z)) / 2
 }
 
 function drawPolygon (c, polygon) {
@@ -249,4 +256,11 @@ function applyResourceColorization (color, resourceValue) {
   return 'rgb(' + r + ',' + g + ',' + b + ')'
 }
 
-module.exports = Hexagon
+exports.radius = radius
+exports.offset = offset
+
+exports.draw = draw
+exports.drawHighlight = drawHighlight
+exports.getPixel = getPixel
+exports.drawReachableHighlight = drawReachableHighlight
+exports.isAdjacent = isAdjacent
