@@ -4,11 +4,12 @@ var world = require('./world.js')
 exports.createModel = function (x, y, z, playerId) {
   var unitModel = {}
 
+  unitModel.type = 'unit'
   unitModel.x = x
   unitModel.y = y
   unitModel.z = z
 
-  unitModel.id = 'unit' + Math.round(Math.random() * 10000000)
+  unitModel.id = Math.round(Math.random() * 1000000000)
 
   unitModel.playerId = playerId
 
@@ -29,13 +30,6 @@ function draw (unitModel, worldModel, ctx) {
   ctx.restore()
 }
 
-function orderTo (unitModel, newHexModel, orders) {
-  orders.push({
-    unitId: unitModel.id,
-    newHexModel: newHexModel
-  })
-}
-
 function moveTo (unitModel, newHexModel) {
   unitModel.x = newHexModel.x
   unitModel.y = newHexModel.y
@@ -44,6 +38,18 @@ function moveTo (unitModel, newHexModel) {
   newHexModel.info.owner = unitModel.playerId
 }
 
+function getUnitFromCoordinate (entityModels, x, y, z) {
+  var resUnitModel = null
+  Object.keys(entityModels).forEach(function (entityId) {
+    var entityModel = entityModels[entityId]
+    if (entityModel.type === 'unit' && entityModel.x === x && entityModel.y === y && entityModel.z === z) {
+      resUnitModel = entityModel
+      return
+    }
+  })
+  return resUnitModel
+}
+
 exports.draw = draw
 exports.moveTo = moveTo
-exports.orderTo = orderTo
+exports.getUnitFromCoordinate = getUnitFromCoordinate

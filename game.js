@@ -4,16 +4,17 @@ var keyboard = createKeyboard()
 var client = require('./client.js')
 
 var world = require('./world.js')
-var player = require('./player.js')
 var unit = require('./unit.js')
 var hexagon = require('./hexagon.js')
 var HUD = require('./hud.js')
 var Menu = require('./menu.js')
+var order = require('./order.js')
 
 // Global game object
 var model = {
   worldModel: null,
-  playerModels: []
+  playerModels: [],
+  entityModels: {}
 }
 
 var game = {
@@ -49,7 +50,6 @@ menu.addItem('Connect', function () {
       state = 'playing'
     })
     client.receiveChanges(function (serverModel) {
-      console.log(serverModel)
       model = serverModel
       world.unhighlightAll(model.worldModel)
       game.mode = 'default'
@@ -73,7 +73,7 @@ keyboard.on('keyup', function (key) {
     // mode-specific commands
     if (game.mode === 'default') {
       if (key === 'M' && currentHex) {
-        var unitModelAtHex = player.getUnitFromCoordinate(model.playerModels[0], currentHex.x, currentHex.y, currentHex.z)
+        var unitModelAtHex = unit.getUnitFromCoordinate(model.entityModels, currentHex.x, currentHex.y, currentHex.z)
         if (unitModelAtHex) {
           game.mode = 'move'
         }
@@ -89,7 +89,7 @@ keyboard.on('keyup', function (key) {
   }
 })
 
-keyboard.on('keydown', function (key) {
+keyboard.on('keyup', function (key) {
   if (state === 'menu') {
     if (key === '<down>') menu.down()
     if (key === '<up>') menu.up()
@@ -104,13 +104,22 @@ keyboard.on('keydown', function (key) {
 document.onmouseup = function (e) {
   if (state === 'playing') {
     var hexModel = world.getHexagonFromPixel(model.worldModel, e.pageX, e.pageY)
-    var unitModel = player.getUnitFromCoordinate(model.playerModels[0], hexModel.x, hexModel.y, hexModel.z)
+    var unitModel = unit.getUnitFromCoordinate(model.entityModels, hexModel.x, hexModel.y, hexModel.z)
     if (game.mode === 'move' && hexModel) {
       var lastHexModel = world.getHightlightedHexagon(model.worldModel)
-      var lastUnitModel = player.getUnitFromCoordinate(model.playerModels[0], lastHexModel.x, lastHexModel.y, lastHexModel.z)
+      var lastUnitModel = unit.getUnitFromCoordinate(model.entityModels, lastHexModel.x, lastHexModel.y, lastHexModel.z)
       if (lastHexModel && lastUnitModel && hexagon.isAdjacent(lastHexModel, hexModel)) {
         if (!unitModel) {
-          unit.orderTo(lastUnitModel, hexModel, game.orders)
+          // create moveUnit order
+          var orderInfo = {
+            pos: {
+              x: hexModel.x,
+              y: hexModel.y
+            }
+          }
+          var orderModel = order.createModel('moveUnit', orderInfo, lastUnitModel.id)
+          game.orders.push(orderModel)
+
           world.unhighlightAll(model.worldModel)
           hexModel.highlighted = true
         }
@@ -173,13 +182,16 @@ function draw (totalTime) {
     world.draw(model.worldModel, ctx)
 
     // unit drawing
-    model.playerModels.forEach(function (playerModel) {
-      playerModel.unitModels.forEach(function (unitModel) {
-        unit.draw(unitModel, model.worldModel, ctx)
-      })
+    Object.keys(model.entityModels).forEach(function (entityId) {
+      var entity = model.entityModels[entityId]
+      if (entity.type === 'unit') {
+        unit.draw(entity, model.worldModel, ctx)
+      }
     })
 
-
+    game.orders.forEach(function (orderModel) {
+      order.draw(orderModel, model.worldModel, model.entityModels, ctx)
+    })
 
     // drawing the highlight on selected hexagon
     var hightlightedHexModel = world.getHightlightedHexagon(model.worldModel)

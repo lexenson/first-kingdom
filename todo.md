@@ -2,17 +2,18 @@
 
 ## High priority
 
-- client/server refactor
-- using resources to build units
+- implement action points for units (limited orders per turn)
+- multiple players in 1 game
+- combat system / resolve unit collisions
+- resource design
+- creating/building units
 - menus and game states
-- combat system
-- turns over network
-- building cities
+- implementing cities
 
 
 ## Low priority
 
-- unhighlight by right-clicking
+- orders overlay
 - animation for unit movement
 - animation for getting territory
 
@@ -30,3 +31,5 @@
 - refactor keyboard to module
 - highlighting tile borders instead of overlay
 - in move-mode: show reachable tiles graphically
+- turns over network
+- client/server refactor
