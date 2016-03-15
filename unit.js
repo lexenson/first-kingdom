@@ -1,13 +1,13 @@
 var hexagon = require('./hexagon.js')
 var world = require('./world.js')
 
-exports.createModel = function (x, y, z, playerId) {
+exports.createModel = function (x, y, playerId) {
   var unitModel = {}
 
   unitModel.type = 'unit'
   unitModel.x = x
   unitModel.y = y
-  unitModel.z = z
+  unitModel.z = -x - y
 
   unitModel.id = Math.round(Math.random() * 1000000000)
 

@@ -7,19 +7,28 @@ var entity = require('./entity.js')
 
 var io = socketio()
 
-var model = null
+var model = {
+  worldModel: null,
+  playerModels: [],
+  entityModels: {}
+}
+
+var worldWidth = 12
+var worldHeight = 12
+var currentPlayerId = 1
 
 function initializeGame () {
-  var model = {
-    worldModel: world.createModel(12, 12),
-    playerModels: [],
-    entityModels: {}
-  }
-  model.playerModels.push(player.createModel(1))
+  model.worldModel = world.createModel(worldWidth, worldHeight)
 
-  var unitModel = unit.createModel(0, 0, 0, model.playerModels[0].id)
-  entity.add(model.entityModels, unitModel)
-  player.addUnit(model.playerModels[0], unitModel, model.worldModel)
+  model.playerModels.forEach(function (playerModel) {
+    var unitModel = unit.createModel(
+      Math.round(Math.random() * (worldWidth - 1)),
+      Math.round(Math.random() * (worldHeight - 1)),
+      playerModel.id
+    )
+    entity.add(model.entityModels, unitModel)
+    player.addUnit(playerModel, unitModel, model.worldModel)
+  })
 
   return model
 }
@@ -46,6 +55,11 @@ io.on('connection', function (socket) {
   // new client connected
   socket.ready = false
   socket.orders = null
+  socket.playerId = currentPlayerId
+  model.playerModels.push(player.createModel(socket.playerId))
+  currentPlayerId++
+
+  socket.emit('playerid', socket.playerId)
 
   socket.on('ready', function () {
     socket.ready = true

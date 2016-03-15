@@ -24,7 +24,8 @@ var game = {
   objects: [],
   turn: 1,
   orders: [],
-  connected: false
+  connected: false,
+  playerId: null
 }
 
 // States:
@@ -45,6 +46,10 @@ menu.addItem('Start', function () {
 menu.addItem('Connect', function () {
   client.connect(serverURL, function () {
     game.connected = true
+    client.receivePlayerId(function (playerId) {
+      game.playerId = playerId
+      console.log(playerId)
+    })
     client.receiveStart(function (serverModel) {
       model = serverModel
       state = 'playing'

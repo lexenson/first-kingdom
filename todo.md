@@ -2,13 +2,13 @@
 
 ## High priority
 
-- implement action points for units (limited orders per turn)
 - multiple players in 1 game
 - combat system / resolve unit collisions
+
 - resource design
 - creating/building units
-- menus and game states
 - implementing cities
+- implement action points for units (limited orders per turn)
 
 
 ## Low priority
@@ -31,5 +31,6 @@
 - refactor keyboard to module
 - highlighting tile borders instead of overlay
 - in move-mode: show reachable tiles graphically
+- menus and game states
 - turns over network
 - client/server refactor
