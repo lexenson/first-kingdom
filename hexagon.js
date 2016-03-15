@@ -5,7 +5,8 @@ var world = require('./world.js')
 var playerColors = [
   {r: 213, g: 213, b: 195},
   {r: 255, g: 110, b: 110},
-  {r: 110, g: 110, b: 255}
+  {r: 110, g: 110, b: 255},
+  {r: 110, g: 255, b: 110}
 ]
 
 exports.createModel = function (x, y, z) {

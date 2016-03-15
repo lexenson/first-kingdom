@@ -56,6 +56,7 @@ io.on('connection', function (socket) {
   socket.ready = false
   socket.orders = null
   socket.playerId = currentPlayerId
+  console.log('Player', currentPlayerId, 'joined.')
   model.playerModels.push(player.createModel(socket.playerId))
   currentPlayerId++
 

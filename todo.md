@@ -2,7 +2,6 @@
 
 ## High priority
 
-- multiple players in 1 game
 - combat system / resolve unit collisions
 
 - resource design
@@ -34,3 +33,4 @@
 - menus and game states
 - turns over network
 - client/server refactor
+- multiple players in 1 game

@@ -36,7 +36,7 @@ var state = 'menu'
 
 var hud = new HUD(model, game)
 
-var serverURL = 'http://localhost:8080'
+var serverURL =  'http://localhost:8080'
 
 var menu = new Menu(0, 100, 100, 100, '#000', '#fff', '#777', 'Arial', keyboard)
 menu.addItem('Start', function () {
@@ -126,13 +126,17 @@ document.onmouseup = function (e) {
           game.orders.push(orderModel)
 
           world.unhighlightAll(model.worldModel)
-          hexModel.highlighted = true
+          game.mode = 'default'
         }
       }
     }
     if (game.mode === 'default') {
       world.unhighlightAll(model.worldModel)
-      if (hexModel && unitModel) hexModel.highlighted = true
+      if (hexModel && unitModel) {
+        if (unitModel.playerId === game.playerId) {
+          hexModel.highlighted = true
+        }
+      }
     }
   }
 }
