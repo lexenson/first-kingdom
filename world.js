@@ -49,6 +49,17 @@ exports.distributeResources = function (worldModel, playerModels) {
   }
 }
 
+exports.updateTileOwnership = function (worldModel, entityModels) {
+  Object.keys(entityModels).forEach(function (entityModelId) {
+    var entityModel = entityModels[entityModelId]
+    var x = entityModel.x
+    var y = entityModel.y
+    var hexModel = exports.getHexagonFromCoordinate(worldModel, x, y)
+
+    hexModel.info.owner = entityModel.playerId
+  })
+}
+
 // returns snapped coordinates in 3d hexagonal cube grid
 // hexPos is a point in the 2d axial hexagonal space
 function hexRound (hexPos) {

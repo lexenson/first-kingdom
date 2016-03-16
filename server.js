@@ -27,8 +27,8 @@ function initializeGame () {
       playerModel.id
     )
     entity.add(model.entityModels, unitModel)
-    player.addUnit(playerModel, unitModel, model.worldModel)
   })
+  world.updateTileOwnership(model.worldModel, model.entityModels)
 
   return model
 }
@@ -42,6 +42,7 @@ function applyOrders (model, orders) {
       unit.moveTo(entityModel, serverHexModel)
     }
   })
+  world.updateTileOwnership(model.worldModel, model.entityModels)
 }
 
 function getSockets () {

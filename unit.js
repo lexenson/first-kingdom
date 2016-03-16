@@ -34,8 +34,6 @@ function moveTo (unitModel, newHexModel) {
   unitModel.x = newHexModel.x
   unitModel.y = newHexModel.y
   unitModel.z = newHexModel.z
-
-  newHexModel.info.owner = unitModel.playerId
 }
 
 function getUnitFromCoordinate (entityModels, x, y, z) {

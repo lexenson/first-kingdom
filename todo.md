@@ -13,6 +13,9 @@
 
 - animation for unit movement
 - animation for getting territory
+- player disconnect handling
+- player reconnect handling
+- multiple games on a server
 
 ## Done
 - basic units
