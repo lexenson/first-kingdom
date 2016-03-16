@@ -23,7 +23,7 @@ var game = {
   height: window.innerHeight,
   objects: [],
   turn: 1,
-  orders: [],
+  orders: {},
   connected: false,
   playerId: null
 }
@@ -122,9 +122,12 @@ document.onmouseup = function (e) {
               y: hexModel.y
             }
           }
-          var orderModel = order.createModel('moveUnit', orderInfo, lastUnitModel.id)
-          game.orders.push(orderModel)
 
+          // adding the order to the game info; overwriting any previous orders for the same unit
+          var orderModel = order.createModel('moveUnit', orderInfo, lastUnitModel.id)
+          game.orders[lastUnitModel.id] = orderModel
+
+          // issuing a move order deselects current unit
           world.unhighlightAll(model.worldModel)
           game.mode = 'default'
         }
@@ -144,8 +147,8 @@ document.onmouseup = function (e) {
 // additional game logic
 
 function nextTurn () {
-  client.sendOrders(game.orders) // TODO: implement orders
-  game.orders = []
+  client.sendOrders(game.orders)
+  game.orders = {}
   state = 'waiting'
 }
 
@@ -198,7 +201,9 @@ function draw (totalTime) {
       }
     })
 
-    game.orders.forEach(function (orderModel) {
+    // order drawing
+    Object.keys(game.orders).forEach(function (unitModelId) {
+      var orderModel = game.orders[unitModelId]
       order.draw(orderModel, model.worldModel, model.entityModels, ctx)
     })
 

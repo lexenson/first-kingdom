@@ -34,10 +34,11 @@ function initializeGame () {
 }
 
 function applyOrders (model, orders) {
-  orders.forEach(function (order) {
-    var entityModel = entity.getFromId(model.entityModels, order.entityId)
-    if (order.type === 'moveUnit') {
-      var serverHexModel = world.getHexagonFromCoordinate(model.worldModel, order.info.pos.x, order.info.pos.y)
+  Object.keys(orders).forEach(function (entityModelId) {
+    var orderModel = orders[entityModelId]
+    var entityModel = entity.getFromId(model.entityModels, entityModelId)
+    if (orderModel.type === 'moveUnit') {
+      var serverHexModel = world.getHexagonFromCoordinate(model.worldModel, orderModel.info.pos.x, orderModel.info.pos.y)
       unit.moveTo(entityModel, serverHexModel)
     }
   })

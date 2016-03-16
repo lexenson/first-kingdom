@@ -3,7 +3,6 @@
 ## High priority
 
 - combat system / resolve unit collisions
-
 - resource design
 - creating/building units
 - implementing cities
@@ -12,7 +11,6 @@
 
 ## Low priority
 
-- orders overlay
 - animation for unit movement
 - animation for getting territory
 
@@ -32,5 +30,7 @@
 - in move-mode: show reachable tiles graphically
 - menus and game states
 - turns over network
+- orders overlay
 - client/server refactor
 - multiple players in 1 game
+- implement that multiple orders of same type can't be done
