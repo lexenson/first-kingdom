@@ -9,11 +9,12 @@ var hexagon = require('./hexagon.js')
 var HUD = require('./hud.js')
 var Menu = require('./menu.js')
 var order = require('./order.js')
+var player = require('./player.js')
 
 // Global game object
 var model = {
   worldModel: null,
-  playerModels: [],
+  playerModels: {},
   entityModels: {}
 }
 
@@ -32,23 +33,26 @@ var game = {
 // - 'menu'
 // - 'playing'
 // - 'waiting'
+// - 'waiting_for_players'
 var state = 'menu'
 
 var hud = new HUD(model, game)
 
-var serverURL =  'http://localhost:8080'
+var serverURL = 'http://localhost:8080'
 
 var menu = new Menu(0, 100, 100, 100, '#000', '#fff', '#777', 'Arial', keyboard)
-menu.addItem('Start', function () {
-  client.setReady()
-  state = 'waiting'
-})
-menu.addItem('Connect', function () {
+menu.addItem('Start new game', function () {
+  state = 'waiting_for_players'
   client.connect(serverURL, function () {
     game.connected = true
     client.receivePlayerId(function (playerId) {
       game.playerId = playerId
       console.log(playerId)
+    })
+    client.receivePlayerModels(function (playerModels) {
+      // update new playings joining
+      model.playerModels = playerModels
+      console.log(playerModels)
     })
     client.receiveStart(function (serverModel) {
       model = serverModel
@@ -72,7 +76,19 @@ var ctx = canvas.getContext('2d')
 
 // keyboard input
 keyboard.on('keyup', function (key) {
-  if (state === 'playing') {
+  if (state === 'menu') {
+    if (key === '<down>') menu.down()
+    if (key === '<up>') menu.up()
+    if (key === '<enter>') menu.select()
+    if (key === '<escape>') state = 'playing'
+  } else if (state === 'waiting_for_players') {
+    if (key === '<enter>') {
+      console.log('I am ready.')
+      client.setReady()
+    }
+  } else if (state === 'playing') {
+    if (key === '<escape>') state = 'menu'
+
     var currentHex = world.getHightlightedHexagon(model.worldModel)
 
     // mode-specific commands
@@ -91,17 +107,6 @@ keyboard.on('keyup', function (key) {
     if (key === '<enter>') {
       nextTurn()
     }
-  }
-})
-
-keyboard.on('keyup', function (key) {
-  if (state === 'menu') {
-    if (key === '<down>') menu.down()
-    if (key === '<up>') menu.up()
-    if (key === '<enter>') menu.select()
-    if (key === '<escape>') state = 'playing'
-  } else if (state === 'playing') {
-    if (key === '<escape>') state = 'menu'
   }
 })
 
@@ -222,6 +227,8 @@ function draw (totalTime) {
     hud.draw(ctx)
   } else if (state === 'menu') {
     menu.draw(ctx, totalTime)
+  } else if (state === 'waiting_for_players') {
+    player.drawPlayerList(model.playerModels, game.playerId, ctx)
   }
 }
 

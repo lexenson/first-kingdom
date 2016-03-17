@@ -8,7 +8,8 @@ var client = {
   setReady: setReady,
   receiveStart: receiveStart,
   sendOrders: sendOrders,
-  receiveChanges: receiveChanges
+  receiveChanges: receiveChanges,
+  receivePlayerModels: receivePlayerModels
 }
 
 function connect (serverURL, cb) {
@@ -41,6 +42,12 @@ function sendOrders (orders) {
 function receiveChanges (cb) {
   socket.on('changes', function (changes) {
     cb(changes)
+  })
+}
+
+function receivePlayerModels (cb) {
+  socket.on('players', function (playerModels) {
+    cb(playerModels)
   })
 }
 

@@ -9,7 +9,7 @@ var io = socketio()
 
 var model = {
   worldModel: null,
-  playerModels: [],
+  playerModels: {},
   entityModels: {}
 }
 
@@ -20,7 +20,8 @@ var currentPlayerId = 1
 function initializeGame () {
   model.worldModel = world.createModel(worldWidth, worldHeight)
 
-  model.playerModels.forEach(function (playerModel) {
+  Object.keys(model.playerModels).forEach(function (playerId) {
+    var playerModel = model.playerModels[playerId]
     var unitModel = unit.createModel(
       Math.round(Math.random() * (worldWidth - 1)),
       Math.round(Math.random() * (worldHeight - 1)),
@@ -45,6 +46,10 @@ function applyOrders (model, orders) {
   world.updateTileOwnership(model.worldModel, model.entityModels)
 }
 
+function removePlayer (playerModels, playerId) {
+  delete playerModels[playerId]
+}
+
 function getSockets () {
   var sockets = []
   for (var socketid in io.sockets.sockets) {
@@ -58,17 +63,22 @@ io.on('connection', function (socket) {
   socket.ready = false
   socket.orders = null
   socket.playerId = currentPlayerId
+
   console.log('Player', currentPlayerId, 'joined.')
-  model.playerModels.push(player.createModel(socket.playerId))
+
+  model.playerModels[currentPlayerId] = player.createModel(socket.playerId)
   currentPlayerId++
 
   socket.emit('playerid', socket.playerId)
 
+  io.sockets.emit('players', model.playerModels)
+
   socket.on('ready', function () {
-    socket.ready = true
-    var sockets = getSockets()
-    var allReady = sockets.every(function (s) {
-      return s.ready
+    var player = model.playerModels[socket.playerId]
+    player.ready = true
+    io.sockets.emit('players', model.playerModels)
+    var allReady = Object.keys(model.playerModels).every(function (playerId) {
+      return model.playerModels[playerId].ready
     })
     if (allReady) {
       // initialize Game
@@ -89,6 +99,11 @@ io.on('connection', function (socket) {
       })
       io.sockets.emit('changes', model)
     }
+  })
+
+  socket.on('disconnect', function () {
+    removePlayer(model.playerModels, socket.playerId)
+    console.log('Player', socket.playerId, 'disconnected')
   })
 })
 io.listen(8080)
