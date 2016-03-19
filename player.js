@@ -5,7 +5,7 @@ function createModel (id) {
   return playerModel
 }
 
-function drawPlayerList (playerModels, ownPlayerId, ctx) {
+function drawPlayerList (playerModels, ownPlayerId, gameID, ctx) {
   var itemSize = 50
   var textSize = Math.floor(0.8 * itemSize)
   var position = 0
@@ -24,6 +24,8 @@ function drawPlayerList (playerModels, ownPlayerId, ctx) {
     ctx.fillText(text, 10, 10 + position * itemSize)
     position++
   }
+  ctx.fillText('Game ID: ' + gameID, 10, 10 + position * itemSize)
+  position++
   ctx.fillText('Press Enter to be ready.', 10, 10 + position * itemSize)
   ctx.restore()
 }

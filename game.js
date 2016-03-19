@@ -244,7 +244,7 @@ function draw (totalTime) {
   } else if (state === 'menu') {
     menu.draw(ctx, totalTime)
   } else if (state === 'waiting_for_players') {
-    player.drawPlayerList(model.playerModels, game.playerId, ctx)
+    player.drawPlayerList(model.playerModels, game.playerId, game.id, ctx)
   }
 }
 
