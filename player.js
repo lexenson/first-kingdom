@@ -24,8 +24,10 @@ function drawPlayerList (playerModels, ownPlayerId, gameID, ctx) {
     ctx.fillText(text, 10, 10 + position * itemSize)
     position++
   }
-  ctx.fillText('Game ID: ' + gameID, 10, 10 + position * itemSize)
-  position++
+  if (gameID) {
+    ctx.fillText('Game ID: ' + gameID, 10, 10 + position * itemSize)
+    position++
+  }
   ctx.fillText('Press Enter to be ready.', 10, 10 + position * itemSize)
   ctx.restore()
 }
