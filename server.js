@@ -10,19 +10,19 @@ var io = socketio()
 
 var models = {}
 
-var worldWidth = 12
-var worldHeight = 12
+var worldRadius = 6
 var currentPlayerId = 1
 
 function initializeGame (model) {
   model.entityModels = {}
-  model.worldModel = world.createModel(worldWidth, worldHeight)
+  model.worldModel = world.createModel(worldRadius)
 
   Object.keys(model.playerModels).forEach(function (playerId) {
     var playerModel = model.playerModels[playerId]
+    var randomHexagonModel = world.getRandomHexagon(model.worldModel)
     var unitModel = unit.createModel(
-      Math.round(Math.random() * (worldWidth - 1)),
-      Math.round(Math.random() * (worldHeight - 1)),
+      randomHexagonModel.x,
+      randomHexagonModel.y,
       playerModel.id
     )
     entity.add(model.entityModels, unitModel)

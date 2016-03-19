@@ -1,11 +1,16 @@
 var hexagon = require('./hexagon.js')
 
-exports.createModel = function (width, height) {
+exports.createModel = function (radius) {
   var worldModel = {}
+  var width = radius * 2
+  var height = radius * 2
   worldModel.hexagons = {}
   for (var x = 0; x < width; x++) {
     for (var y = 0; y < height; y++) {
-      worldModel.hexagons[x + ',' + y] = hexagon.createModel(x, y, -y - x)
+      var hexModel = hexagon.createModel(x, y, -y - x)
+      if (hexagon.getDistance(hexModel, {x: radius, y: radius, z: -2 * radius}) < radius) {
+        worldModel.hexagons[x + ',' + y] = hexModel
+      }
     }
   }
   return worldModel
@@ -58,6 +63,13 @@ exports.updateTileOwnership = function (worldModel, entityModels) {
 
     hexModel.info.owner = entityModel.playerId
   })
+}
+
+exports.getRandomHexagon = function (worldModel) {
+  var hexagonKeys = Object.keys(worldModel.hexagons)
+  var randomIndex = Math.round(Math.random() * hexagonKeys.length)
+  var randomKey = hexagonKeys[randomIndex]
+  return worldModel.hexagons[randomKey]
 }
 
 // returns snapped coordinates in 3d hexagonal cube grid

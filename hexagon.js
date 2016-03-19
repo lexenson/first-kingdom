@@ -259,3 +259,4 @@ exports.drawHighlight = drawHighlight
 exports.getPixel = getPixel
 exports.drawReachableHighlight = drawReachableHighlight
 exports.isAdjacent = isAdjacent
+exports.getDistance = getDistance
