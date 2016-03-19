@@ -1,4 +1,5 @@
 var socketio = require('socket.io')
+var randomString = require('randomString')
 
 var world = require('./world.js')
 var player = require('./player.js')
@@ -7,17 +8,14 @@ var entity = require('./entity.js')
 
 var io = socketio()
 
-var model = {
-  worldModel: null,
-  playerModels: {},
-  entityModels: {}
-}
+var models = {}
 
 var worldWidth = 12
 var worldHeight = 12
 var currentPlayerId = 1
 
-function initializeGame () {
+function initializeGame (model) {
+  model.entityModels = {}
   model.worldModel = world.createModel(worldWidth, worldHeight)
 
   Object.keys(model.playerModels).forEach(function (playerId) {
@@ -50,60 +48,76 @@ function removePlayer (playerModels, playerId) {
   delete playerModels[playerId]
 }
 
-function getSockets () {
-  var sockets = []
-  for (var socketid in io.sockets.sockets) {
-    if (io.sockets.sockets.hasOwnProperty(socketid)) sockets.push(io.sockets.sockets[socketid])
-  }
-  return sockets
-}
-
 io.on('connection', function (socket) {
   // new client connected
   socket.ready = false
-  socket.orders = null
-  socket.playerId = currentPlayerId
+  socket.gameId = null
 
-  console.log('Player', currentPlayerId, 'joined.')
+  function newPlayer () {
+    var model = models[socket.gameId]
+    console.log('Player', currentPlayerId, 'joined', socket.gameId)
+    socket.playerId = currentPlayerId
+    model.playerModels[currentPlayerId] = player.createModel(socket.playerId)
+    currentPlayerId++
 
-  model.playerModels[currentPlayerId] = player.createModel(socket.playerId)
-  currentPlayerId++
+    socket.emit('playerid', socket.playerId)
+    io.to(socket.gameId).emit('players', model.playerModels)
+  }
 
-  socket.emit('playerid', socket.playerId)
+  socket.on('newgame', function () {
+    var gameId = randomString.generate(7)
+    models[gameId] = {
+      playerModels: {}
+    }
+    socket.gameId = gameId
+    socket.emit('gameid', gameId)
+    socket.join(gameId)
+    newPlayer()
+  })
 
-  io.sockets.emit('players', model.playerModels)
+  socket.on('joingame', function (gameId) {
+    socket.join(gameId)
+    socket.gameId = gameId
+    newPlayer()
+  })
 
   socket.on('ready', function () {
-    var player = model.playerModels[socket.playerId]
-    player.ready = true
-    io.sockets.emit('players', model.playerModels)
+    var model = models[socket.gameId]
+    var playerModel = model.playerModels[socket.playerId]
+    playerModel.ready = true
+    io.to(socket.gameId).emit('players', model.playerModels)
     var allReady = Object.keys(model.playerModels).every(function (playerId) {
       return model.playerModels[playerId].ready
     })
     if (allReady) {
       // initialize Game
-      model = initializeGame()
-      io.sockets.emit('start', model)
+      model = initializeGame(model)
+      io.to(socket.gameId).emit('start', model)
     }
   })
 
   socket.on('orders', function (orders) {
+    var model = models[socket.gameId]
+    var playerModel = model.playerModels[socket.playerId]
     applyOrders(model, orders)
-    socket.orders = orders
-    var allOrdersSent = getSockets().every(function (s) {
-      return !!s.orders
+    playerModel.orders = orders
+    var allOrdersSent = Object.keys(model.playerModels).every(function (playerId) {
+      return !!model.playerModels[playerId].orders
     })
     if (allOrdersSent) {
-      getSockets().forEach(function (s) {
-        s.orders = null
-      })
-      io.sockets.emit('changes', model)
+      for (var playerId in model.playerModels) {
+        model.playerModels[playerId].orders = null
+      }
+      io.to(socket.gameId).emit('changes', model)
     }
   })
 
   socket.on('disconnect', function () {
-    removePlayer(model.playerModels, socket.playerId)
-    console.log('Player', socket.playerId, 'disconnected')
+    var model = models[socket.gameId]
+    if (model) {
+      removePlayer(model.playerModels, socket.playerId)
+      console.log('Player', socket.playerId, 'disconnected')
+    }
   })
 })
 io.listen(8080)

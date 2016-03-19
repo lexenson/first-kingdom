@@ -1,7 +1,7 @@
 var createKeyboard = require('crtrdg-keyboard')
 var keyboard = createKeyboard()
 
-var client = require('./client.js')
+var connectClient = require('./client.js')
 
 var world = require('./world.js')
 var unit = require('./unit.js')
@@ -39,32 +39,48 @@ var state = 'menu'
 var hud = new HUD(model, game)
 
 var serverURL = 'http://localhost:8080'
+var client = connectClient(serverURL)
+client.on('connect', function () {
+  game.connected = true
+})
 
 var menu = new Menu(0, 100, 100, 100, '#000', '#fff', '#777', 'Arial', keyboard)
 menu.addItem('Start new game', function () {
   state = 'waiting_for_players'
-  client.connect(serverURL, function () {
-    game.connected = true
-    client.receivePlayerId(function (playerId) {
-      game.playerId = playerId
-      console.log(playerId)
-    })
-    client.receivePlayerModels(function (playerModels) {
-      // update new playings joining
-      model.playerModels = playerModels
-      console.log(playerModels)
-    })
-    client.receiveStart(function (serverModel) {
-      model = serverModel
-      state = 'playing'
-    })
-    client.receiveChanges(function (serverModel) {
-      model = serverModel
-      world.unhighlightAll(model.worldModel)
-      game.mode = 'default'
-      state = 'playing'
-    })
-  })
+  client.emit('newgame')
+})
+
+menu.addItem('Join game', function () {
+  var gameId = window.prompt('Enter the game id')
+  game.id = gameId
+  state = 'waiting_for_players'
+  client.emit('joingame', gameId)
+})
+
+// client handlers
+
+client.on('gameid', function (gameId) {
+  console.log('Game:', gameId)
+  game.id = gameId
+})
+client.on('playerid', function (playerId) {
+  game.playerId = playerId
+  console.log(playerId)
+})
+client.on('players', function (playerModels) {
+  // update new playings joining
+  model.playerModels = playerModels
+  console.log(playerModels)
+})
+client.on('start', function (serverModel) {
+  model = serverModel
+  state = 'playing'
+})
+client.on('changes', function (serverModel) {
+  model = serverModel
+  world.unhighlightAll(model.worldModel)
+  game.mode = 'default'
+  state = 'playing'
 })
 
 // Creating canvas
@@ -84,7 +100,7 @@ keyboard.on('keyup', function (key) {
   } else if (state === 'waiting_for_players') {
     if (key === '<enter>') {
       console.log('I am ready.')
-      client.setReady()
+      client.emit('ready')
     }
   } else if (state === 'playing') {
     if (key === '<escape>') state = 'menu'
@@ -152,7 +168,7 @@ document.onmouseup = function (e) {
 // additional game logic
 
 function nextTurn () {
-  client.sendOrders(game.orders)
+  client.emit('orders', game.orders)
   game.orders = {}
   state = 'waiting'
 }
