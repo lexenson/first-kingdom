@@ -57,7 +57,7 @@ function draw (hexModel, ctx) {
   ctx.save()
   ctx.beginPath()
   drawPolygon(ctx, hexModel.polygon)
-  ctx.fillStyle = applyResourceColorization(playerColors[hexModel.info.owner], hexModel.info.resources)
+  ctx.fillStyle = applyResourceColorization(playerColors[Number(hexModel.info.owner) % playerColors.length], hexModel.info.resources)
   ctx.strokeStyle = '#000000'
   ctx.lineWidth = 2
   ctx.stroke()
