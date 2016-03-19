@@ -50,7 +50,6 @@ function removePlayer (playerModels, playerId) {
 
 io.on('connection', function (socket) {
   // new client connected
-  socket.ready = false
   socket.gameId = null
 
   function newPlayer () {
