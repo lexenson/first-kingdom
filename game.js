@@ -23,7 +23,6 @@ var game = {
   width: window.innerWidth,
   height: window.innerHeight,
   objects: [],
-  turn: 1,
   orders: {},
   connected: false,
   playerId: null

@@ -13,8 +13,7 @@ function HUD (model, game) {
 HUD.prototype.update = function (dt) {
   this.texts = [
     'FIRST KINGDOM',
-    'mode: ' + this.game.mode,
-    'turn:' + this.game.turn
+    'mode: ' + this.game.mode
   ]
   this.pos.y = this.game.height - this.texts.length * 15
 }
