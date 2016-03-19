@@ -15,7 +15,6 @@
 - animation for getting territory
 - player disconnect handling
 - player reconnect handling
-- multiple games on a server
 
 ## Done
 - basic units
@@ -37,3 +36,4 @@
 - client/server refactor
 - multiple players in 1 game
 - implement that multiple orders of same type can't be done
+- multiple games on a server
