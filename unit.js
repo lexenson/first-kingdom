@@ -23,8 +23,7 @@ function draw (unitModel, worldModel, ctx) {
 
   ctx.save()
   ctx.beginPath()
-  ctx.arc(pixelPos.x, pixelPos.y, hexModel.radius / 2, 0, 2 * Math.PI)
-  ctx.fillStyle = unitModel.color
+  ctx.drawImage(document.querySelector('#unit'), pixelPos.x - 15, pixelPos.y - 20)
   ctx.fill()
   ctx.closePath()
   ctx.restore()
@@ -48,6 +47,19 @@ function getUnitFromCoordinate (entityModels, x, y, z) {
   return resUnitModel
 }
 
+function getAllUnitsFromCoordinate (entityModels, x, y, z) {
+  var resUnitModels = []
+  Object.keys(entityModels).forEach(function (entityId) {
+    var entityModel = entityModels[entityId]
+    if (entityModel.type === 'unit' && entityModel.x === x && entityModel.y === y && entityModel.z === z) {
+      resUnitModels.push(entityModel)
+      return
+    }
+  })
+  return resUnitModels
+}
+
 exports.draw = draw
 exports.moveTo = moveTo
 exports.getUnitFromCoordinate = getUnitFromCoordinate
+exports.getAllUnitsFromCoordinate = getAllUnitsFromCoordinate

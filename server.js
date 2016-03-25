@@ -41,7 +41,6 @@ function applyOrders (model, orders) {
       unit.moveTo(entityModel, serverHexModel)
     }
   })
-  world.updateTileOwnership(model.worldModel, model.entityModels)
 }
 
 function removePlayer (playerModels, playerId) {
@@ -104,6 +103,9 @@ io.on('connection', function (socket) {
       return !!model.playerModels[playerId].orders
     })
     if (allOrdersSent) {
+      world.fightUnits(model.entityModels)
+      world.updateTileOwnership(model.worldModel, model.entityModels)
+      world.spawnNewUnits(model.worldModel, model.entityModels)
       for (var playerId in model.playerModels) {
         model.playerModels[playerId].orders = null
       }

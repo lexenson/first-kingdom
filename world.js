@@ -1,4 +1,6 @@
 var hexagon = require('./hexagon.js')
+var entity = require('./entity.js')
+var unit = require('./unit.js')
 
 exports.createModel = function (radius) {
   var worldModel = {}
@@ -45,15 +47,6 @@ exports.getHightlightedHexagon = function (worldModel) {
   }
 }
 
-exports.distributeResources = function (worldModel, playerModels) {
-  for (var tileIndex in worldModel.hexagons) {
-    var hexModel = worldModel.hexagons[tileIndex]
-    if (hexModel.info.owner > 0) {
-      playerModels[hexModel.info.owner - 1].resources += hexModel.info.resources
-    }
-  }
-}
-
 exports.updateTileOwnership = function (worldModel, entityModels) {
   Object.keys(entityModels).forEach(function (entityModelId) {
     var entityModel = entityModels[entityModelId]
@@ -65,11 +58,60 @@ exports.updateTileOwnership = function (worldModel, entityModels) {
   })
 }
 
+exports.fightUnits = function (entityModels) {
+  // right now just removes duplicate units on fields
+  var positions = {}
+  Object.keys(entityModels).forEach(function (entityModelId) {
+    var entityModel = entityModels[entityModelId]
+    if (entityModel.type === 'unit') {
+      var positionKey = entityModel.x + ',' + entityModel.y
+      if (positions[positionKey]) {
+        positions[positionKey].push(entityModelId)
+      } else {
+        positions[positionKey] = [entityModelId]
+      }
+    }
+  })
+  // find positions that have multiple units
+  Object.keys(positions).forEach(function (position) {
+    var entityModelIds = positions[position]
+    if (entityModelIds.length > 1) {
+      entityModelIds.forEach(function (entityModelId) {
+        delete entityModels[entityModelId]
+      })
+    }
+  })
+}
+
 exports.getRandomHexagon = function (worldModel) {
   var hexagonKeys = Object.keys(worldModel.hexagons)
   var randomIndex = Math.round(Math.random() * hexagonKeys.length)
   var randomKey = hexagonKeys[randomIndex]
   return worldModel.hexagons[randomKey]
+}
+
+// New units are created on castles that are controlled
+exports.spawnNewUnits = function (worldModel, entityModels) {
+  for (var hexagonKey in worldModel.hexagons) {
+    var hexagonModel = worldModel.hexagons[hexagonKey]
+    var existingUnits = unit.getAllUnitsFromCoordinate(entityModels, hexagonModel.x, hexagonModel.y, hexagonModel.z)
+    if (hexagonModel.castle && hexagonModel.info.owner > 0 && existingUnits.length === 0) {
+      if (hexagonModel.info.unitCountdown) {
+        hexagonModel.info.unitCountdown -= 1
+        // have we reached 0? then add new unit
+        if (hexagonModel.info.unitCountdown === 0) {
+          var unitModel = unit.createModel(
+            hexagonModel.x,
+            hexagonModel.y,
+            hexagonModel.info.owner
+          )
+          entity.add(entityModels, unitModel)
+        }
+      } else {
+        hexagonModel.info.unitCountdown = 5
+      }
+    }
+  }
 }
 
 // returns snapped coordinates in 3d hexagonal cube grid

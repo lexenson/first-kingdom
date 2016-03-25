@@ -3,10 +3,9 @@ var world = require('./world.js')
 // pointy-topped hexagon
 
 var playerColors = [
-  {r: 213, g: 213, b: 195},
-  {r: 255, g: 110, b: 110},
-  {r: 110, g: 110, b: 255},
-  {r: 110, g: 255, b: 110}
+  '#e7d579', // neutral
+  '#e2ad66',
+  '#b994ab'
 ]
 
 exports.createModel = function (x, y, z) {
@@ -16,7 +15,7 @@ exports.createModel = function (x, y, z) {
   hexModel.y = y
   hexModel.z = z
 
-  hexModel.radius = 40
+  hexModel.radius = 30
   hexModel.height = hexModel.radius * 2
   hexModel.width = (Math.sqrt(3) / 2) * hexModel.height
 
@@ -25,10 +24,17 @@ exports.createModel = function (x, y, z) {
 
   hexModel.highlighted = false
 
+  hexModel.tree = Math.random() > 0.8
+  hexModel.mountains = Math.random() > 0.85
+  if (!hexModel.tree && !hexModel.mountains) {
+    hexModel.castle = Math.random() > 0.8
+  } else {
+    hexModel.castle = false
+  }
+
   hexModel.info = {
     owner: 0, // 0 -> no owner, other number -> owner id
-    city: false,
-    resources: Math.round(Math.random() * 9) // between 0-9
+    city: false
   }
 
   // polygon corners in pixel coordinates
@@ -46,7 +52,7 @@ exports.createModel = function (x, y, z) {
   return hexModel
 }
 
-var radius = 40
+var radius = 30
 
 var offset = {
   x: radius,
@@ -57,12 +63,34 @@ function draw (hexModel, ctx) {
   ctx.save()
   ctx.beginPath()
   drawPolygon(ctx, hexModel.polygon)
-  ctx.fillStyle = applyResourceColorization(playerColors[Number(hexModel.info.owner) % playerColors.length], hexModel.info.resources)
+  ctx.fillStyle = playerColors[Number(hexModel.info.owner) % playerColors.length]
   ctx.strokeStyle = '#000000'
   ctx.lineWidth = 2
   ctx.stroke()
   ctx.fill()
   ctx.closePath()
+  var p = getPixel(hexModel)
+
+  ctx.fillStyle = '#000'
+  ctx.font = '24px Arial'
+
+  if (hexModel.mountains) {
+    ctx.drawImage(document.querySelector('#mountains'), p.x - 15, p.y - 15)
+  }
+  if (hexModel.tree) {
+    ctx.drawImage(document.querySelector('#tree'), p.x + 10, p.y)
+    ctx.drawImage(document.querySelector('#tree'), p.x, p.y - 10)
+    ctx.drawImage(document.querySelector('#tree'), p.x + 8, p.y - 20)
+    ctx.drawImage(document.querySelector('#tree'), p.x - 20, p.y)
+  }
+
+  if (hexModel.castle) {
+    ctx.drawImage(document.querySelector('#castle'), p.x - 15, p.y - 15)
+  }
+
+  if (hexModel.info.unitCountdown) {
+    ctx.fillText(hexModel.info.unitCountdown, p.x - 10, p.y - 15)
+  }
   ctx.restore()
 }
 
@@ -241,14 +269,6 @@ function drawPolygon (c, polygon) {
   for (var i = 1; i < polygon.length; i++) c.lineTo(polygon[i].x, polygon[i].y)
   c.lineTo(polygon[0].x, polygon[0].y)
   c.closePath()
-}
-
-// darken color(in rgb)
-function applyResourceColorization (color, resourceValue) {
-  var r = color.r - resourceValue * 10
-  var g = color.g - resourceValue * 10
-  var b = color.b - resourceValue * 10
-  return 'rgb(' + r + ',' + g + ',' + b + ')'
 }
 
 exports.radius = radius
