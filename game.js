@@ -89,38 +89,51 @@ canvas.height = game.height
 document.body.appendChild(canvas)
 var ctx = canvas.getContext('2d')
 
+// UI actions
+function onaction (action, options) {
+  // only place where game and model is modified (apart from server)
+  // more complex stuff should maybe get their own function
+  // maybe this should get routed through states/modes
+  if (action === 'menu_down') menu.down()
+  if (action === 'menu_up') menu.up()
+  if (action === 'menu_select') menu.select()
+  if (action === 'set_ready') client.emit('ready')
+  if (action === 'use_move_mode') game.mode = 'move'
+  if (action === 'use_default_mode') game.mode = 'default'
+  if (action === 'next_turn') nextTurn()
+  if (action === 'add_order') {
+    game.orders[options.entityId] = options
+
+    // issuing a move order deselects current unit
+    world.unhighlightAll(model.worldModel)
+    game.mode = 'default'
+  }
+}
+
 // keyboard input
 keyboard.on('keyup', function (key) {
   if (state === 'menu') {
-    if (key === '<down>') menu.down()
-    if (key === '<up>') menu.up()
-    if (key === '<enter>') menu.select()
-    if (key === '<escape>') state = 'playing'
+    if (key === '<down>') onaction('menu_down')
+    if (key === '<up>') onaction('menu_up')
+    if (key === '<enter>') onaction('menu_select')
   } else if (state === 'waiting_for_players') {
-    if (key === '<enter>') {
-      console.log('I am ready.')
-      client.emit('ready')
-    }
+    if (key === '<enter>') onaction('set_ready')
   } else if (state === 'playing') {
-    if (key === '<escape>') state = 'menu'
-
     var currentHex = world.getHightlightedHexagon(model.worldModel)
 
     // mode-specific commands
     if (game.mode === 'default') {
       if (key === 'M' && currentHex) {
         var unitModelAtHex = unit.getUnitFromCoordinate(model.entityModels, currentHex.x, currentHex.y, currentHex.z)
-        if (unitModelAtHex) {
-          game.mode = 'move'
-        }
+        if (unitModelAtHex) onaction('use_move_mode')
       }
     } else if (game.mode === 'move') {
-      if (key === 'M') game.mode = 'default'
+      if (key === 'M') onaction('use_default_mode')
     }
 
     // general commands
     if (key === '<enter>') {
-      nextTurn()
+      onaction('next_turn')
     }
   }
 })
@@ -142,14 +155,7 @@ document.onmouseup = function (e) {
               y: hexModel.y
             }
           }
-
-          // adding the order to the game info; overwriting any previous orders for the same unit
-          var orderModel = order.createModel('moveUnit', orderInfo, lastUnitModel.id)
-          game.orders[lastUnitModel.id] = orderModel
-
-          // issuing a move order deselects current unit
-          world.unhighlightAll(model.worldModel)
-          game.mode = 'default'
+          onaction('add_order', order.createModel('moveUnit', orderInfo, lastUnitModel.id))
         }
       }
     }
@@ -191,12 +197,6 @@ function main () {
 function update (dt) {
   if (state === 'playing') {
     hud.update(dt)
-
-    // for (var i = 0; i < game.objects.length; i++) {
-    //   if (game.objects[i].update) {
-    //     game.objects[i].update(dt)
-    //   }
-    // }
   }
 }
 
@@ -206,11 +206,6 @@ function draw (totalTime) {
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
   if (state === 'playing') {
-    // for (var i = 0; i < game.objects.length; i++) {
-    //   if (game.objects[i].draw) {
-    //     game.objects[i].draw(ctx)
-    //   }
-    // }
     world.draw(model.worldModel, ctx)
 
     // unit drawing
