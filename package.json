@@ -4,7 +4,7 @@
   "description": "TBS game based on a hexagonal grid",
   "main": "game.js",
   "scripts": {
-    "start": "wzrd game.js"
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
@@ -23,8 +23,10 @@
   },
   "dependencies": {
     "crtrdg-keyboard": "^1.0.1",
+    "http-hash-router": "^1.1.0",
     "randomstring": "^1.1.4",
     "socket.io": "^1.4.5",
-    "socket.io-client": "^1.4.5"
+    "socket.io-client": "^1.4.5",
+    "st": "^1.1.0"
   }
 }

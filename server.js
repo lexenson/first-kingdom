@@ -1,12 +1,55 @@
+var http = require('http')
+var path = require('path')
+var fs = require('fs')
+
 var socketio = require('socket.io')
+var hashRouter = require('http-hash-router')
+var st = require('st')
 var randomString = require('randomString')
+var browserify = require('browserify')
 
 var world = require('./world.js')
 var player = require('./player.js')
 var unit = require('./unit.js')
 var entity = require('./entity.js')
 
-var io = socketio()
+// server to serve 'static' files
+
+var router = hashRouter()
+
+router.set('*', st(__dirname))
+
+router.set('/', function (req, res) {
+  res.setHeader('content-type', 'text/html')
+  fs.createReadStream(path.join(__dirname, 'index.html'))
+    .pipe(res)
+})
+
+router.set('game.js', function (req, res) {
+  var br = browserify()
+  br.add(path.join(__dirname, 'game.js'))
+  res.setHeader('Content-Type', 'text/javascript')
+  br.bundle().pipe(res)
+})
+
+var server = http.createServer(function (req, res) {
+  router(req, res, {}, onError)
+
+  function onError (err) {
+    if (err) {
+      res.statusCode = err.statusCode || 500
+      res.end(err.message)
+    }
+  }
+})
+
+server.listen(8080, function () {
+  console.log('Listening on port 8080')
+})
+
+// add socket.io for communication
+
+var io = socketio(server)
 
 var models = {}
 
@@ -121,4 +164,3 @@ io.on('connection', function (socket) {
     }
   })
 })
-io.listen(8080)
