@@ -21,7 +21,7 @@ var model = {
 var game = {
   mode: 'default', // 'move'
   width: 800, // window.innerWidth,
-  height: 600, // window.innerHeight,
+  height: 640, // window.innerHeight,
   objects: [],
   orders: {},
   connected: false,

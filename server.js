@@ -53,7 +53,7 @@ var io = socketio(server)
 
 var models = {}
 
-var worldRadius = 6
+var worldRadius = 5
 var currentPlayerId = 1
 
 function initializeGame (model) {

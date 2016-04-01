@@ -23,7 +23,7 @@ function draw (unitModel, worldModel, ctx) {
 
   ctx.save()
   ctx.beginPath()
-  ctx.drawImage(document.querySelector('#unit'), pixelPos.x - 15, pixelPos.y - 20)
+  ctx.drawImage(document.querySelector('#unit'), pixelPos.x - 28, pixelPos.y - 50)
   ctx.fill()
   ctx.closePath()
   ctx.restore()

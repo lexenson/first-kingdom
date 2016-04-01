@@ -144,8 +144,8 @@ function hexRound (hexPos) {
 // returns coordinates of appropriate hex in 3d grid
 function pixelToHex (x, y) {
   // offset
-  x -= hexagon.radius + 1
-  y -= hexagon.radius + 1
+  x -= hexagon.offset.x
+  y -= hexagon.offset.y
 
   // converts pixel coordinates to 2d axial hexagonal space
   var res = {}

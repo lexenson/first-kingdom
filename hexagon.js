@@ -14,7 +14,7 @@ exports.createModel = function (x, y, z) {
   hexModel.y = y
   hexModel.z = z
 
-  hexModel.radius = 30
+  hexModel.radius = 45
   hexModel.height = hexModel.radius * 2
   hexModel.width = (Math.sqrt(3) / 2) * hexModel.height
 
@@ -51,11 +51,11 @@ exports.createModel = function (x, y, z) {
   return hexModel
 }
 
-var radius = 30
+var radius = 45
 
 var offset = {
-  x: radius,
-  y: radius + 1
+  x: -190,
+  y: -20
 }
 
 function draw (hexModel, ctx) {
@@ -85,7 +85,7 @@ function draw (hexModel, ctx) {
   }
 
   if (hexModel.castle) {
-    ctx.drawImage(document.querySelector('#castle'), p.x - 15, p.y - 15)
+    ctx.drawImage(document.querySelector('#castle'), p.x - 30, p.y - 29)
   }
 
   if (hexModel.info.unitCountdown) {
