@@ -1,12 +1,11 @@
 var world = require('./world.js')
+var config = require('./config.js')
 
 // pointy-topped hexagon
 
-var playerColors = [
-  '#e7d579', // neutral
-  '#e2ad66',
-  '#b994ab'
-]
+var playerColors = config.colors.playerColors
+
+var neutralColor = config.colors.hexagonBackground
 
 exports.createModel = function (x, y, z) {
   var hexModel = {}
@@ -63,8 +62,9 @@ function draw (hexModel, ctx) {
   ctx.save()
   ctx.beginPath()
   drawPolygon(ctx, hexModel.polygon)
-  ctx.fillStyle = playerColors[Number(hexModel.info.owner) % playerColors.length]
-  ctx.strokeStyle = '#000000'
+  var playerId = Number(hexModel.info.owner)
+  ctx.fillStyle = playerId > 0 ? playerColors[playerId % playerColors.length] : neutralColor
+  ctx.strokeStyle = config.colors.hexagonBorder
   ctx.lineWidth = 2
   ctx.stroke()
   ctx.fill()
@@ -121,7 +121,7 @@ function drawReachableHighlight (hexModel, ctx, worldModel) {
 
     // drawing lines between reachable and unreachable hexagons
     ctx.save()
-    ctx.strokeStyle = '#e68a00'
+    ctx.strokeStyle = config.colors.hexagonHighlightBorder
     ctx.lineWidth = 3
     if (reachableTiles.indexOf(neighbors['topLeft']) < 0) {
       ctx.beginPath()

@@ -37,7 +37,7 @@ var state = 'menu'
 
 var hud = new HUD(model, game)
 
-var serverURL = 'http://localhost:8080'
+var serverURL = window.location.toString()
 var client = connectClient(serverURL)
 client.on('connect', function () {
   game.connected = true
@@ -147,7 +147,8 @@ document.onmouseup = function (e) {
       var lastHexModel = world.getHightlightedHexagon(model.worldModel)
       var lastUnitModel = unit.getUnitFromCoordinate(model.entityModels, lastHexModel.x, lastHexModel.y, lastHexModel.z)
       if (lastHexModel && lastUnitModel && hexagon.isAdjacent(lastHexModel, hexModel)) {
-        if (!unitModel) {
+        // if there is no unit model or the unit model is an enemy, go there!
+        if (!unitModel || unitModel.playerId !== lastUnitModel.playerId) {
           // create moveUnit order
           var orderInfo = {
             pos: {
