@@ -14,20 +14,20 @@ function drawPlayerList (playerModels, ownPlayerId, gameID, ctx) {
   ctx.textBaseline = 'top'
   ctx.fillStyle = '#000000'
   ctx.font = textSize.toString() + 'px Arial'
-  ctx.fillText('Players:', 10, 10 + position * itemSize)
+  ctx.fillText('Players:', 100, 10 + position * itemSize)
   position++
   for (var playerId in playerModels) {
     var text = Number(ownPlayerId) === Number(playerId) ? 'You' : 'Player ' + playerId
     var player = playerModels[playerId]
     if (player.ready) text += ' (ready)'
-    ctx.fillText(text, 10, 10 + position * itemSize)
+    ctx.fillText(text, 100, 10 + position * itemSize)
     position++
   }
   if (gameID) {
-    ctx.fillText('Game ID: ' + gameID, 10, 10 + position * itemSize)
+    ctx.fillText('Game ID: ' + gameID, 100, 10 + position * itemSize)
     position++
   }
-  ctx.fillText('Press Enter to be ready.', 10, 10 + position * itemSize)
+  ctx.fillText('Press Enter to be ready.', 100, 10 + position * itemSize)
   ctx.restore()
 }
 

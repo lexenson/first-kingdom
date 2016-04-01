@@ -20,8 +20,8 @@ var model = {
 
 var game = {
   mode: 'default', // 'move'
-  width: window.innerWidth,
-  height: window.innerHeight,
+  width: 800, // window.innerWidth,
+  height: 600, // window.innerHeight,
   objects: [],
   orders: {},
   connected: false,
@@ -43,7 +43,7 @@ client.on('connect', function () {
   game.connected = true
 })
 
-var menu = new Menu(0, 100, 100, 100, '#000', '#fff', '#777', 'Arial', keyboard)
+var menu = new Menu(100, 200, 200, 200, '#000', '#fff', '#777', 'Arial', keyboard)
 menu.addItem('Start new game', function () {
   state = 'waiting_for_players'
   client.emit('newgame')
@@ -86,7 +86,7 @@ client.on('changes', function (serverModel) {
 var canvas = document.createElement('canvas')
 canvas.width = game.width
 canvas.height = game.height
-document.body.appendChild(canvas)
+document.querySelector('#screen').appendChild(canvas)
 var ctx = canvas.getContext('2d')
 
 // UI actions
@@ -139,9 +139,19 @@ keyboard.on('keyup', function (key) {
 })
 
 // mouse input
+
+function getMousePos (e) {
+  var rect = canvas.getBoundingClientRect()
+  return {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top
+  }
+}
+
 document.onmouseup = function (e) {
+  var pos = getMousePos(e)
   if (state === 'playing') {
-    var hexModel = world.getHexagonFromPixel(model.worldModel, e.pageX, e.pageY)
+    var hexModel = world.getHexagonFromPixel(model.worldModel, pos.x, pos.y)
     var unitModel = unit.getUnitFromCoordinate(model.entityModels, hexModel.x, hexModel.y, hexModel.z)
     if (game.mode === 'move' && hexModel) {
       var lastHexModel = world.getHightlightedHexagon(model.worldModel)
@@ -203,8 +213,11 @@ function update (dt) {
 
 function draw (totalTime) {
   // clears the context in preparation for redrawing
-  ctx.fillStyle = '#D8D3D0'
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  var backgroundImage = document.querySelector('#background')
+  var backgroundPattern = ctx.createPattern(backgroundImage, 'repeat')
+  ctx.rect(0, 0, canvas.width, canvas.height)
+  ctx.fillStyle = backgroundPattern
+  ctx.fill()
 
   if (state === 'playing') {
     world.draw(model.worldModel, ctx)
@@ -241,6 +254,7 @@ function draw (totalTime) {
   } else if (state === 'waiting_for_players') {
     player.drawPlayerList(model.playerModels, game.playerId, game.id, ctx)
   }
+  ctx.drawImage(document.querySelector('#title'), 15, 15)
 }
 
 function timestamp () {

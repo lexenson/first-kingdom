@@ -15,9 +15,6 @@ Menu.prototype.draw = function (ctx, time) {
   var itemSize = this.height / this.items.length
   var textSize = Math.floor(0.8 * itemSize)
   ctx.save()
-  // draw background
-  ctx.fillStyle = this.backgroundColor
-  ctx.fillRect(this.x, this.y, this.width, this.height)
 
   // draw items
   ctx.textBaseline = 'top'
