@@ -23,9 +23,24 @@ exports.createModel = function (x, y, z) {
 
   hexModel.highlighted = false
 
-  hexModel.tree = Math.random() > 0.8
-  hexModel.mountains = Math.random() > 0.85
-  if (!hexModel.tree && !hexModel.mountains) {
+  var p = getPixel(hexModel) // should pixel stuff only be in the view?
+
+  hexModel.hasTrees = Math.random() > 0.8
+  if (hexModel.hasTrees) {
+    var numberOfTrees = Math.round(Math.random() * 2) + 1
+    hexModel.trees = Array(numberOfTrees).fill(0)
+      .map(function () {
+        var tree = {}
+        tree.x = p.x + Math.round(Math.random() * 1 * hexModel.radius - hexModel.radius)
+        tree.y = p.y + Math.round(Math.random() * 1 * hexModel.radius - hexModel.radius)
+        return tree
+      })
+      .sort(function (a, b) {
+        return b.y - a.y
+      })
+  }
+  if (!hexModel.hasTrees) hexModel.mountains = Math.random() > 0.80
+  if (!hexModel.hasTrees && !hexModel.mountains) {
     hexModel.castle = Math.random() > 0.8
   } else {
     hexModel.castle = false
@@ -38,7 +53,6 @@ exports.createModel = function (x, y, z) {
 
   // polygon corners in pixel coordinates
   hexModel.polygon = []
-  var p = getPixel(hexModel)
   for (var i = 0; i < 6; i++) {
     hexModel.polygon.push(
       {
@@ -75,13 +89,12 @@ function draw (hexModel, ctx) {
   ctx.font = '24px Arial'
 
   if (hexModel.mountains) {
-    ctx.drawImage(document.querySelector('#mountains'), p.x - 15, p.y - 15)
+    ctx.drawImage(document.querySelector('#mountains'), p.x - 30, p.y - 30)
   }
-  if (hexModel.tree) {
-    ctx.drawImage(document.querySelector('#tree'), p.x + 10, p.y)
-    ctx.drawImage(document.querySelector('#tree'), p.x, p.y - 10)
-    ctx.drawImage(document.querySelector('#tree'), p.x + 8, p.y - 20)
-    ctx.drawImage(document.querySelector('#tree'), p.x - 20, p.y)
+  if (hexModel.hasTrees) {
+    hexModel.trees.forEach(function (tree) {
+      ctx.drawImage(document.querySelector('#tree'), tree.x, tree.y)
+    })
   }
 
   if (hexModel.castle) {

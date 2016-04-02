@@ -221,15 +221,6 @@ function draw (totalTime) {
 
   if (state === 'playing') {
     world.draw(model.worldModel, ctx)
-
-    // unit drawing
-    Object.keys(model.entityModels).forEach(function (entityId) {
-      var entity = model.entityModels[entityId]
-      if (entity.type === 'unit') {
-        unit.draw(entity, model.worldModel, ctx)
-      }
-    })
-
     // order drawing
     Object.keys(game.orders).forEach(function (unitModelId) {
       var orderModel = game.orders[unitModelId]
@@ -247,6 +238,14 @@ function draw (totalTime) {
     }
 
     if (hightlightedHexModel) hexagon.drawHighlight(hightlightedHexModel, ctx, totalTime)
+
+    // unit drawing
+    Object.keys(model.entityModels).forEach(function (entityId) {
+      var entity = model.entityModels[entityId]
+      if (entity.type === 'unit') {
+        unit.draw(entity, model.worldModel, ctx)
+      }
+    })
 
     hud.draw(ctx)
   } else if (state === 'menu') {
