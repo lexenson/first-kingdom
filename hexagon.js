@@ -122,6 +122,20 @@ function drawHighlight (hexModel, ctx, time) {
   ctx.stroke()
   ctx.closePath()
   ctx.restore()
+
+  var p = getPixel(hexModel)
+  // TODO: image clipping in own module
+  ctx.drawImage(
+    document.querySelector('#unitmenu'),
+    0,  // source coordinates
+    0,
+    76,
+    48,
+    p.x - 2 * hexModel.radius, // target coordinates
+    p.y - 2 * hexModel.radius,
+    76,
+    48
+  )
 }
 
 function drawReachableHighlight (hexModel, ctx, worldModel) {

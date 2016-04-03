@@ -31,7 +31,7 @@ var game = {
 // States:
 // - 'menu'
 // - 'playing'
-// - 'waiting'
+// - 'waiting_for_move'
 // - 'waiting_for_players'
 var state = 'menu'
 
@@ -186,7 +186,7 @@ document.onmouseup = function (e) {
 function nextTurn () {
   client.emit('orders', game.orders)
   game.orders = {}
-  state = 'waiting'
+  state = 'waiting_for_move'
 }
 
 // main game functions
@@ -252,6 +252,13 @@ function draw (totalTime) {
     menu.draw(ctx, totalTime)
   } else if (state === 'waiting_for_players') {
     player.drawPlayerList(model.playerModels, game.playerId, game.id, ctx)
+  } else if (state === 'waiting_for_move') {
+    ctx.save()
+    ctx.textBaseline = 'top'
+    ctx.fillStyle = '#000000'
+    ctx.font = '40px Arial'
+    ctx.fillText('Waiting for other players...', 100, 200)
+    ctx.restore()
   }
   ctx.drawImage(document.querySelector('#title'), 15, 15)
 }
